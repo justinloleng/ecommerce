@@ -6,10 +6,10 @@ services:
     container_name: ecommerce_mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: ecommerce_db
-      MYSQL_USER: ecommerce_user
-      MYSQL_PASSWORD: ecommerce_pass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-changeme_root_password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-ecommerce_db}
+      MYSQL_USER: ${MYSQL_USER:-ecommerce_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-changeme_db_password}
     ports:
       - "3306:3306"
     volumes:
@@ -27,11 +27,11 @@ services:
       - "5000:5000"
     environment:
       DATABASE_HOST: db
-      DATABASE_USER: ecommerce_user
-      DATABASE_PASSWORD: ecommerce_pass
-      DATABASE_NAME: ecommerce_db
-      SECRET_KEY: change-this-secret-key-in-production
-      FLASK_ENV: development
+      DATABASE_USER: ${MYSQL_USER:-ecommerce_user}
+      DATABASE_PASSWORD: ${MYSQL_PASSWORD:-changeme_db_password}
+      DATABASE_NAME: ${MYSQL_DATABASE:-ecommerce_db}
+      SECRET_KEY: ${SECRET_KEY:-please-change-this-secret-key-in-production}
+      FLASK_ENV: ${FLASK_ENV:-development}
     depends_on:
       db:
         condition: service_healthy

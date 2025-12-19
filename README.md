@@ -151,8 +151,9 @@ This creates:
 - All required database tables
 - Default admin account:
   - Username: `admin`
-  - Password: `admin123`
-  - **⚠️ Change this password immediately after first login!**
+  - Password: **Auto-generated secure random password (displayed in console)**
+  - **⚠️ Save the password shown in console - it won't be displayed again!**
+  - Or set custom password via `ADMIN_PASSWORD` environment variable
 
 ### Step 7: Run the Application
 
@@ -171,8 +172,8 @@ The application will be available at: `http://localhost:5000`
 2. **Login as admin**: 
    - Go to login page
    - Username: `admin`
-   - Password: `admin123`
-   - **Important**: Change the admin password after first login
+   - Password: Use the auto-generated password shown when you ran `init_db.py`
+   - **Important**: Save the password from console output
 
 3. **Set up categories**:
    - Navigate to Admin Dashboard → Manage Categories

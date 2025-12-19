@@ -18,7 +18,8 @@ docker-compose up -d
 # http://localhost:5000
 
 # Login credentials:
-# Admin: admin / admin123
+# Admin: admin / (check docker logs for auto-generated password)
+# To view password: docker-compose logs web | grep -A 5 "IMPORTANT"
 # (Create customer account via registration)
 ```
 
@@ -80,8 +81,9 @@ Visit: http://localhost:5000
 
 **Admin Account:**
 - Username: `admin`
-- Password: `admin123`
-- ⚠️ **Change this password immediately after first login!**
+- Password: Auto-generated (displayed in console output from `init_db.py`)
+- ⚠️ **Save the password shown during initialization!**
+- Set custom password via `ADMIN_PASSWORD` environment variable
 
 **Customer Account:**
 - Register a new account at http://localhost:5000/register

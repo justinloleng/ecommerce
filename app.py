@@ -47,8 +47,29 @@ def init_database():
         admin = User.query.filter_by(username='admin').first()
         if not admin:
             from flask_bcrypt import Bcrypt
+            import secrets
+            import string
+            
+            # Check for admin password in environment variable
+            admin_password = os.getenv('ADMIN_PASSWORD')
+            
+            # If not set, generate a secure random password
+            if not admin_password:
+                # Generate random password: 16 characters with letters, digits, and symbols
+                alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+                admin_password = ''.join(secrets.choice(alphabet) for i in range(16))
+                print("\n" + "="*60)
+                print("IMPORTANT: Default admin user created with random password")
+                print("="*60)
+                print(f"Username: admin")
+                print(f"Password: {admin_password}")
+                print("="*60)
+                print("SAVE THIS PASSWORD NOW! It will not be shown again.")
+                print("Set ADMIN_PASSWORD environment variable to use custom password.")
+                print("="*60 + "\n")
+            
             bcrypt = Bcrypt()
-            hashed_password = bcrypt.generate_password_hash('admin123').decode('utf-8')
+            hashed_password = bcrypt.generate_password_hash(admin_password).decode('utf-8')
             admin = User(
                 username='admin',
                 email='admin@ecommerce.com',
@@ -58,7 +79,7 @@ def init_database():
             )
             db.session.add(admin)
             db.session.commit()
-            print("Default admin user created (username: admin, password: admin123)")
+            print("Default admin user created successfully!")
 
 if __name__ == '__main__':
     app = create_app()
