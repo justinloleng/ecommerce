@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: ecommerce_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ecommerce_db
+      MYSQL_USER: ecommerce_user
+      MYSQL_PASSWORD: ecommerce_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    container_name: ecommerce_app
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_HOST: db
+      DATABASE_USER: ecommerce_user
+      DATABASE_PASSWORD: ecommerce_pass
+      DATABASE_NAME: ecommerce_db
+      SECRET_KEY: change-this-secret-key-in-production
+      FLASK_ENV: development
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./frontend/static/uploads:/app/frontend/static/uploads
+    command: >
+      sh -c "
+        sleep 10 &&
+        python init_db.py &&
+        python add_sample_data.py &&
+        python app.py
+      "
+
+volumes:
+  mysql_data:
