@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}{% if category %}Edit{% else %}Add{% endif %} Category - Admin{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">{% if category %}Edit{% else %}Add{% endif %} Category</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" action="{% if category %}{{ url_for('admin.edit_category', category_id=category.id) }}{% else %}{{ url_for('admin.add_category') }}{% endif %}">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Category Name *</label>
+                        <input type="text" class="form-control" id="name" name="name" 
+                               value="{% if category %}{{ category.name }}{% endif %}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4">{% if category %}{{ category.description }}{% endif %}</textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        {% if category %}Update{% else %}Add{% endif %} Category
+                    </button>
+                    <a href="{{ url_for('admin.categories') }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

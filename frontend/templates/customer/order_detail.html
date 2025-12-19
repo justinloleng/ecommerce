@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.id }} - E-Commerce{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Order #{{ order.id }}</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Order Items</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.order_items %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>${{ "%.2f"|format(item.price) }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>${{ "%.2f"|format(item.price * item.quantity) }}</td>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                            <td><strong>${{ "%.2f"|format(order.total_amount) }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        {% if order.decline_reason %}
+        <div class="alert alert-danger">
+            <strong>Decline Reason:</strong> {{ order.decline_reason }}
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>Order Status</h5>
+            </div>
+            <div class="card-body">
+                <h4>
+                    <span class="badge 
+                        {% if order.status == 'Pending' %}bg-warning
+                        {% elif order.status == 'Approved' %}bg-info
+                        {% elif order.status == 'Shipped' %}bg-primary
+                        {% elif order.status == 'Delivered' %}bg-success
+                        {% elif order.status == 'Declined' %}bg-danger
+                        {% endif %}">
+                        {{ order.status }}
+                    </span>
+                </h4>
+                <p class="text-muted mb-0">Order Date: {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+            </div>
+        </div>
+        
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>Shipping Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Address:</strong><br>{{ order.shipping_address }}</p>
+                <p><strong>Phone:</strong> {{ order.phone }}</p>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>Payment Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Method:</strong> 
+                    {% if order.payment.payment_method == 'cod' %}
+                        Cash on Delivery
+                    {% else %}
+                        Online Payment
+                    {% endif %}
+                </p>
+                <p><strong>Status:</strong> {{ order.payment.status }}</p>
+            </div>
+        </div>
+        
+        <a href="{{ url_for('customer.orders') }}" class="btn btn-secondary w-100 mt-3">
+            Back to Orders
+        </a>
+    </div>
+</div>
+{% endblock %}

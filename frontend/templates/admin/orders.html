@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Orders - Admin{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Manage Orders</h1>
+
+<div class="mb-3">
+    <a href="{{ url_for('admin.orders') }}" class="btn btn-sm {% if not current_status %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+    <a href="{{ url_for('admin.orders', status='Pending') }}" class="btn btn-sm {% if current_status == 'Pending' %}btn-warning{% else %}btn-outline-warning{% endif %}">Pending</a>
+    <a href="{{ url_for('admin.orders', status='Approved') }}" class="btn btn-sm {% if current_status == 'Approved' %}btn-info{% else %}btn-outline-info{% endif %}">Approved</a>
+    <a href="{{ url_for('admin.orders', status='Shipped') }}" class="btn btn-sm {% if current_status == 'Shipped' %}btn-primary{% else %}btn-outline-primary{% endif %}">Shipped</a>
+    <a href="{{ url_for('admin.orders', status='Delivered') }}" class="btn btn-sm {% if current_status == 'Delivered' %}btn-success{% else %}btn-outline-success{% endif %}">Delivered</a>
+    <a href="{{ url_for('admin.orders', status='Declined') }}" class="btn btn-sm {% if current_status == 'Declined' %}btn-danger{% else %}btn-outline-danger{% endif %}">Declined</a>
+</div>
+
+{% if orders %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Payment Method</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <td>#{{ order.id }}</td>
+                        <td>{{ order.user.username }}</td>
+                        <td>${{ "%.2f"|format(order.total_amount) }}</td>
+                        <td>
+                            {% if order.payment.payment_method == 'cod' %}
+                                Cash on Delivery
+                            {% else %}
+                                Online Payment
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {% if order.status == 'Pending' %}bg-warning
+                                {% elif order.status == 'Approved' %}bg-info
+                                {% elif order.status == 'Shipped' %}bg-primary
+                                {% elif order.status == 'Delivered' %}bg-success
+                                {% elif order.status == 'Declined' %}bg-danger
+                                {% endif %}">
+                                {{ order.status }}
+                            </span>
+                        </td>
+                        <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.order_detail', order_id=order.id) }}" 
+                               class="btn btn-sm btn-primary">View</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-info">No orders found.</div>
+{% endif %}
+
+<a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+{% endblock %}

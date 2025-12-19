@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - E-Commerce{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Checkout</h1>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header">
+                <h5>Shipping Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('customer.checkout') }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="shipping_address" class="form-label">Shipping Address *</label>
+                        <textarea class="form-control" id="shipping_address" name="shipping_address" 
+                                  rows="3" required>{{ current_user.address }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone Number *</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" 
+                               value="{{ current_user.phone }}" required>
+                    </div>
+                    
+                    <h5 class="mt-4 mb-3">Payment Method</h5>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payment_method" 
+                                   id="cod" value="cod" checked onclick="togglePaymentProof()">
+                            <label class="form-check-label" for="cod">
+                                Cash on Delivery
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payment_method" 
+                                   id="online" value="online" onclick="togglePaymentProof()">
+                            <label class="form-check-label" for="online">
+                                Online Payment (Upload Payment Proof)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" id="payment_proof_container" style="display: none;">
+                        <label for="payment_proof" class="form-label">Upload Payment Proof (Screenshot) *</label>
+                        <input type="file" class="form-control" id="payment_proof" name="payment_proof" 
+                               accept="image/png,image/jpeg,image/jpg">
+                        <small class="text-muted">Accepted formats: PNG, JPG, JPEG</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-3">
+                        Place Order
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header">
+                <h5>Order Summary</h5>
+            </div>
+            <div class="card-body">
+                {% for item in cart_items %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>{{ item.product.name }} x {{ item.quantity }}</span>
+                        <span>${{ "%.2f"|format(item.product.price * item.quantity) }}</span>
+                    </div>
+                {% endfor %}
+                <hr>
+                <div class="d-flex justify-content-between mb-3">
+                    <strong>Total:</strong>
+                    <strong class="text-primary">${{ "%.2f"|format(total) }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePaymentProof() {
+    const onlineRadio = document.getElementById('online');
+    const paymentProofContainer = document.getElementById('payment_proof_container');
+    const paymentProofInput = document.getElementById('payment_proof');
+    
+    if (onlineRadio.checked) {
+        paymentProofContainer.style.display = 'block';
+        paymentProofInput.required = true;
+    } else {
+        paymentProofContainer.style.display = 'none';
+        paymentProofInput.required = false;
+    }
+}
+</script>
+{% endblock %}

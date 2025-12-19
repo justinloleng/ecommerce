@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Sales Reports - Admin{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">{{ title }}</h1>
+
+<div class="mb-4">
+    <a href="{{ url_for('admin.reports', period='daily') }}" 
+       class="btn btn-sm {% if period == 'daily' %}btn-primary{% else %}btn-outline-primary{% endif %}">Daily</a>
+    <a href="{{ url_for('admin.reports', period='weekly') }}" 
+       class="btn btn-sm {% if period == 'weekly' %}btn-primary{% else %}btn-outline-primary{% endif %}">Weekly</a>
+    <a href="{{ url_for('admin.reports', period='monthly') }}" 
+       class="btn btn-sm {% if period == 'monthly' %}btn-primary{% else %}btn-outline-primary{% endif %}">Monthly</a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Total Sales</h5>
+                <h2 class="text-success">${{ "%.2f"|format(total_sales) }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Total Orders</h5>
+                <h2 class="text-primary">{{ total_orders }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Product Sales</h5>
+            </div>
+            <div class="card-body">
+                {% if product_sales %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Units Sold</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in product_sales %}
+                                    <tr>
+                                        <td>{{ product[0] }}</td>
+                                        <td>{{ product[1] }}</td>
+                                        <td>${{ "%.2f"|format(product[2]) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No sales data for this period.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>Recent Orders</h5>
+            </div>
+            <div class="card-body">
+                {% if orders %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                    <tr>
+                                        <td>#{{ order.id }}</td>
+                                        <td>{{ order.user.username }}</td>
+                                        <td>${{ "%.2f"|format(order.total_amount) }}</td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if order.status == 'Pending' %}bg-warning
+                                                {% elif order.status == 'Approved' %}bg-info
+                                                {% elif order.status == 'Shipped' %}bg-primary
+                                                {% elif order.status == 'Delivered' %}bg-success
+                                                {% elif order.status == 'Declined' %}bg-danger
+                                                {% endif %}">
+                                                {{ order.status }}
+                                            </span>
+                                        </td>
+                                        <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No orders for this period.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}{% if product %}Edit{% else %}Add{% endif %} Product - Admin{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">{% if product %}Edit{% else %}Add{% endif %} Product</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" action="{% if product %}{{ url_for('admin.edit_product', product_id=product.id) }}{% else %}{{ url_for('admin.add_product') }}{% endif %}">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Product Name *</label>
+                        <input type="text" class="form-control" id="name" name="name" 
+                               value="{% if product %}{{ product.name }}{% endif %}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4">{% if product %}{{ product.description }}{% endif %}</textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="price" class="form-label">Price *</label>
+                                <input type="number" class="form-control" id="price" name="price" 
+                                       value="{% if product %}{{ product.price }}{% endif %}" 
+                                       step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="stock_quantity" class="form-label">Stock Quantity *</label>
+                                <input type="number" class="form-control" id="stock_quantity" name="stock_quantity" 
+                                       value="{% if product %}{{ product.stock_quantity }}{% else %}0{% endif %}" 
+                                       min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="category_id" class="form-label">Category *</label>
+                        <select class="form-select" id="category_id" name="category_id" required>
+                            <option value="">Select a category</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" 
+                                    {% if product and product.category_id == category.id %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="image_url" class="form-label">Image URL</label>
+                        <input type="url" class="form-control" id="image_url" name="image_url" 
+                               value="{% if product %}{{ product.image_url }}{% endif %}" 
+                               placeholder="https://example.com/image.jpg">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        {% if product %}Update{% else %}Add{% endif %} Product
+                    </button>
+                    <a href="{{ url_for('admin.products') }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

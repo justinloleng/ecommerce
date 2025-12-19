@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - E-Commerce{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        {% if product.image_url %}
+            <img src="{{ product.image_url }}" class="img-fluid rounded" alt="{{ product.name }}">
+        {% else %}
+            <div class="bg-secondary d-flex align-items-center justify-content-center rounded" 
+                 style="height: 400px;">
+                <i class="fas fa-image fa-5x text-white"></i>
+            </div>
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <h2>{{ product.name }}</h2>
+        <p class="text-muted">Category: {{ product.category.name }}</p>
+        <h3 class="text-primary">${{ "%.2f"|format(product.price) }}</h3>
+        <p class="{% if product.stock_quantity > 0 %}text-success{% else %}text-danger{% endif %}">
+            {% if product.stock_quantity > 0 %}
+                In Stock ({{ product.stock_quantity }} available)
+            {% else %}
+                Out of Stock
+            {% endif %}
+        </p>
+        <p class="lead">{{ product.description }}</p>
+        
+        {% if current_user.is_authenticated and current_user.role == 'customer' %}
+            {% if product.stock_quantity > 0 %}
+                <form method="POST" action="{{ url_for('customer.add_to_cart') }}" class="mt-4">
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="quantity" class="form-label">Quantity</label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" 
+                                   value="1" min="1" max="{{ product.stock_quantity }}" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg mt-3">
+                        <i class="fas fa-cart-plus"></i> Add to Cart
+                    </button>
+                </form>
+            {% else %}
+                <button class="btn btn-secondary btn-lg mt-3" disabled>Out of Stock</button>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-info mt-4">
+                Please <a href="{{ url_for('auth.login') }}">login</a> to add items to your cart.
+            </div>
+        {% endif %}
+        
+        <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary mt-3">
+            <i class="fas fa-arrow-left"></i> Back to Products
+        </a>
+    </div>
+</div>
+{% endblock %}

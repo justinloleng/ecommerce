@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.id }} - Admin{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Order #{{ order.id }}</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Order Items</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.order_items %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>${{ "%.2f"|format(item.price) }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>${{ "%.2f"|format(item.price * item.quantity) }}</td>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                            <td><strong>${{ "%.2f"|format(order.total_amount) }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>Update Order Status</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.update_order_status', order_id=order.id) }}">
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                            <option value="Approved" {% if order.status == 'Approved' %}selected{% endif %}>Approved</option>
+                            <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                            <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                            <option value="Declined" {% if order.status == 'Declined' %}selected{% endif %}>Declined</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="decline_reason_container" style="{% if order.status != 'Declined' %}display: none;{% endif %}">
+                        <label for="decline_reason" class="form-label">Decline Reason</label>
+                        <textarea class="form-control" id="decline_reason" name="decline_reason" rows="3">{{ order.decline_reason }}</textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>Customer Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Name:</strong> {{ order.user.full_name }}</p>
+                <p><strong>Username:</strong> {{ order.user.username }}</p>
+                <p><strong>Email:</strong> {{ order.user.email }}</p>
+            </div>
+        </div>
+        
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>Shipping Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Address:</strong><br>{{ order.shipping_address }}</p>
+                <p><strong>Phone:</strong> {{ order.phone }}</p>
+            </div>
+        </div>
+        
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>Payment Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Method:</strong> 
+                    {% if order.payment.payment_method == 'cod' %}
+                        Cash on Delivery
+                    {% else %}
+                        Online Payment
+                    {% endif %}
+                </p>
+                <p><strong>Status:</strong> {{ order.payment.status }}</p>
+                {% if order.payment.payment_proof_file %}
+                    <p><strong>Payment Proof:</strong><br>
+                        <a href="{{ url_for('static', filename='uploads/payments/' + order.payment.payment_proof_file) }}" 
+                           target="_blank" class="btn btn-sm btn-info">
+                            <i class="fas fa-file-image"></i> View Screenshot
+                        </a>
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>Order Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Order Date:</strong><br>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                <p><strong>Last Updated:</strong><br>{{ order.updated_at.strftime('%Y-%m-%d %H:%M') }}</p>
+            </div>
+        </div>
+        
+        <a href="{{ url_for('admin.orders') }}" class="btn btn-secondary w-100 mt-3">Back to Orders</a>
+    </div>
+</div>
+
+<script>
+document.getElementById('status').addEventListener('change', function() {
+    const declineReasonContainer = document.getElementById('decline_reason_container');
+    const declineReasonInput = document.getElementById('decline_reason');
+    
+    if (this.value === 'Declined') {
+        declineReasonContainer.style.display = 'block';
+        declineReasonInput.required = true;
+    } else {
+        declineReasonContainer.style.display = 'none';
+        declineReasonInput.required = false;
+    }
+});
+</script>
+{% endblock %}

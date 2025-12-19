@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}My Orders - E-Commerce{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">My Orders</h1>
+
+{% if orders %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <td>#{{ order.id }}</td>
+                        <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>${{ "%.2f"|format(order.total_amount) }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if order.status == 'Pending' %}bg-warning
+                                {% elif order.status == 'Approved' %}bg-info
+                                {% elif order.status == 'Shipped' %}bg-primary
+                                {% elif order.status == 'Delivered' %}bg-success
+                                {% elif order.status == 'Declined' %}bg-danger
+                                {% endif %}">
+                                {{ order.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('customer.order_detail', order_id=order.id) }}" 
+                               class="btn btn-sm btn-primary">View Details</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        You haven't placed any orders yet. <a href="{{ url_for('main.index') }}">Start shopping!</a>
+    </div>
+{% endif %}
+{% endblock %}
