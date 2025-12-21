@@ -210,6 +210,12 @@ async function handleRegister(event) {
 
     if (response.ok) {
       showToast("Registration successful! Welcome to E-Shop", "success");
+      
+      // Save user data to localStorage
+      if (result.user) {
+        localStorage.setItem("user", JSON.stringify(result.user));
+      }
+      
       // Auto-login after successful registration
       setTimeout(() => {
         window.location.href = "dashboard.html";

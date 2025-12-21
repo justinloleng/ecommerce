@@ -519,7 +519,9 @@ async function addToCart(productId) {
     
     if (!user) {
       showToast("Please login to add items to cart", "error");
-      window.location.href = "index.html";
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 1500);
       return;
     }
 
