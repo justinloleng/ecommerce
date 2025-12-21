@@ -52,13 +52,13 @@ function setupNavigation() {
   // Cart link
   document.getElementById("cartLink").addEventListener("click", function (e) {
     e.preventDefault();
-    showToast("Cart feature coming soon!", "info");
+    window.location.href = "cart.html";
   });
 
   // Orders link
   document.getElementById("ordersLink").addEventListener("click", function (e) {
     e.preventDefault();
-    showToast("Orders feature coming soon!", "info");
+    window.location.href = "orders.html";
   });
 
   // Logout
