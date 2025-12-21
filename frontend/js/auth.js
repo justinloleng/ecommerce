@@ -259,10 +259,8 @@ async function handleLogin(event) {
     if (response.ok) {
       showToast("Login successful! Redirecting...", "success");
 
-   
       localStorage.setItem("user", JSON.stringify(result.user));
 
-     
       setTimeout(() => {
         window.location.href = "dashboard.html";
       }, 1000);
@@ -286,11 +284,9 @@ async function checkAuthStatus() {
     });
 
     if (response.ok) {
-
       window.location.href = "dashboard.html";
     }
   } catch (error) {
- 
     console.log("User not logged in");
   }
 }
@@ -310,7 +306,6 @@ async function checkAuthStatus() {
     const data = await response.json();
 
     if (data.logged_in) {
-
       localStorage.setItem("user", JSON.stringify(data.user));
 
       // If on login page, redirect to dashboard
@@ -323,10 +318,8 @@ async function checkAuthStatus() {
       }
       return true;
     } else {
-   
       localStorage.removeItem("user");
 
-      
       if (window.location.pathname.includes("dashboard.html")) {
         window.location.href = "index.html";
       }
@@ -336,7 +329,6 @@ async function checkAuthStatus() {
     console.log("Auth check failed:", error);
     localStorage.removeItem("user");
 
-   
     if (window.location.pathname.includes("dashboard.html")) {
       window.location.href = "index.html";
     }
@@ -348,29 +340,25 @@ async function checkAuthStatus() {
 async function logout() {
   try {
     showLoading();
-I
+    I;
     const response = await fetch(`${API_BASE_URL}/auth/logout`, {
       method: "POST",
       credentials: "include",
     });
 
     if (response.ok) {
-    
       localStorage.clear();
       sessionStorage.clear();
 
       showToast("Logged out successfully!", "success");
 
-   
       setTimeout(() => {
-   
         if ("caches" in window) {
           caches.keys().then(function (names) {
             for (let name of names) caches.delete(name);
           });
         }
 
-     
         window.location.href = "index.html?" + new Date().getTime();
       }, 1000);
     } else {
@@ -379,7 +367,7 @@ I
     }
   } catch (error) {
     console.error("Logout error:", error);
-  
+
     localStorage.clear();
     window.location.href = "index.html";
   } finally {
