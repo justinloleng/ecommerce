@@ -52,13 +52,13 @@ function setupNavigation() {
   // Cart link
   document.getElementById("cartLink").addEventListener("click", function (e) {
     e.preventDefault();
-    showToast("Cart feature coming soon!", "info");
+    window.location.href = "cart.html";
   });
 
   // Orders link
   document.getElementById("ordersLink").addEventListener("click", function (e) {
     e.preventDefault();
-    showToast("Orders feature coming soon!", "info");
+    window.location.href = "orders.html";
   });
 
   // Logout
@@ -513,32 +513,61 @@ productDetailModal.addEventListener("click", function (e) {
   }
 });
 
-function addToCart(productId) {
-  // Get current cart from localStorage
-  let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+async function addToCart(productId) {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    
+    if (!user) {
+      showToast("Please login to add items to cart", "error");
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 1500);
+      return;
+    }
 
-  // Check if product already in cart
-  const existingItem = cart.find((item) => item.product_id === productId);
-
-  if (existingItem) {
-    // Increase quantity
-    existingItem.quantity += 1;
-  } else {
-    // Add new item
-    cart.push({
-      product_id: productId,
-      quantity: 1,
-      added_at: new Date().toISOString(),
+    // Add to backend cart
+    const response = await fetch(`${API_BASE_URL}/cart/add`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        user_id: user.id,
+        product_id: productId,
+        quantity: 1,
+      }),
     });
+
+    if (response.ok) {
+      // Also update localStorage for consistency
+      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const existingItem = cart.find((item) => item.product_id === productId);
+
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({
+          product_id: productId,
+          quantity: 1,
+          added_at: new Date().toISOString(),
+        });
+      }
+
+      localStorage.setItem("cart", JSON.stringify(cart));
+
+      // Update cart count
+      updateCartCount();
+
+      showToast("Product added to cart!", "success");
+    } else {
+      const error = await response.json();
+      showToast(error.error || "Failed to add to cart", "error");
+    }
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    showToast("Network error. Please try again.", "error");
   }
-
-  // Save back to localStorage
-  localStorage.setItem("cart", JSON.stringify(cart));
-
-  // Update cart count
-  updateCartCount();
-
-  showToast("Product added to cart!", "success");
 }
 
 function toggleWishlist(productId) {
@@ -560,13 +589,33 @@ function toggleWishlist(productId) {
 }
 
 function updateCartCount() {
-  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-
   const cartCountElement = document.querySelector(".cart-count");
   if (cartCountElement) {
-    cartCountElement.textContent = totalItems;
-    cartCountElement.style.display = totalItems > 0 ? "inline-block" : "none";
+    const user = JSON.parse(localStorage.getItem("user"));
+    
+    if (user) {
+      // Fetch from API
+      fetch(`${API_BASE_URL}/cart?user_id=${user.id}`)
+        .then((r) => r.json())
+        .then((data) => {
+          const count = data.item_count || 0;
+          cartCountElement.textContent = count;
+          cartCountElement.style.display = count > 0 ? "inline-block" : "none";
+        })
+        .catch(() => {
+          // Fallback to localStorage
+          const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+          const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+          cartCountElement.textContent = totalItems;
+          cartCountElement.style.display = totalItems > 0 ? "inline-block" : "none";
+        });
+    } else {
+      // No user, just use localStorage
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+      cartCountElement.textContent = totalItems;
+      cartCountElement.style.display = totalItems > 0 ? "inline-block" : "none";
+    }
   }
 }
 

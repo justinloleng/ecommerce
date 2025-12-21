@@ -311,7 +311,9 @@ function displayOrderDetails(order) {
                 <div class="shipping-info">
                     ${
                       order.shipping_address
-                        ? `
+                        ? typeof order.shipping_address === 'string'
+                          ? `<p>${order.shipping_address}</p>`
+                          : `
                         <p><strong>${
                           order.shipping_address.full_name || ""
                         }</strong></p>
@@ -347,10 +349,10 @@ function displayOrderDetails(order) {
                     ${
                       order.payment_method
                         ? `
-                        <p><strong>${order.payment_method}</strong></p>
+                        <p><strong>${order.payment_method.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</strong></p>
                         ${
                           order.payment_status
-                            ? `<p>Status: <span class="status-${order.payment_status}">${order.payment_status}</span></p>`
+                            ? `<p>Status: <span class="status-${order.payment_status}">${order.payment_status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span></p>`
                             : ""
                         }
                         ${
@@ -1029,9 +1031,10 @@ function updateCartCount() {
     0
   );
 
-  const cartCountElement = document.getElementById("cartCount");
+  const cartCountElement = document.querySelector(".cart-count");
   if (cartCountElement) {
     cartCountElement.textContent = cartCount;
+    cartCountElement.style.display = cartCount > 0 ? "inline-block" : "none";
   }
 }
 

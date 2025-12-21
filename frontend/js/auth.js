@@ -210,6 +210,12 @@ async function handleRegister(event) {
 
     if (response.ok) {
       showToast("Registration successful! Welcome to E-Shop", "success");
+      
+      // Save user data to localStorage
+      if (result.user) {
+        localStorage.setItem("user", JSON.stringify(result.user));
+      }
+      
       // Auto-login after successful registration
       setTimeout(() => {
         window.location.href = "dashboard.html";
@@ -277,70 +283,34 @@ async function handleLogin(event) {
 
 // Check if user is already logged in
 async function checkAuthStatus() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/auth/me`, {
-      method: "GET",
-      credentials: "include",
-    });
-
-    if (response.ok) {
-      window.location.href = "dashboard.html";
-    }
-  } catch (error) {
-    console.log("User not logged in");
+  // For pages that require authentication
+  const currentPage = window.location.pathname;
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  
+  // Pages that require authentication
+  const authRequiredPages = ["dashboard.html", "products.html", "cart.html", "orders.html", "checkout.html"];
+  const isAuthRequired = authRequiredPages.some(page => currentPage.includes(page));
+  
+  // If on login/register page and user exists, redirect to dashboard
+  if ((currentPage.includes("index.html") || currentPage.endsWith("/")) && user) {
+    window.location.href = "dashboard.html";
+    return true;
   }
-}
-
-// Check login status
-async function checkAuthStatus() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/auth/check-login`, {
-      method: "GET",
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      throw new Error("Not authenticated");
-    }
-
-    const data = await response.json();
-
-    if (data.logged_in) {
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      // If on login page, redirect to dashboard
-      if (
-        window.location.pathname.includes("index.html") ||
-        window.location.pathname.endsWith("/") ||
-        window.location.pathname.includes("frontend/index.html")
-      ) {
-        window.location.href = "dashboard.html";
-      }
-      return true;
-    } else {
-      localStorage.removeItem("user");
-
-      if (window.location.pathname.includes("dashboard.html")) {
-        window.location.href = "index.html";
-      }
-      return false;
-    }
-  } catch (error) {
-    console.log("Auth check failed:", error);
-    localStorage.removeItem("user");
-
-    if (window.location.pathname.includes("dashboard.html")) {
-      window.location.href = "index.html";
-    }
+  
+  // If on auth-required page and no user, redirect to login
+  if (isAuthRequired && !user) {
+    window.location.href = "index.html";
     return false;
   }
+  
+  return !!user;
 }
 
 // Handle logout
 async function logout() {
   try {
     showLoading();
-    I;
+    
     const response = await fetch(`${API_BASE_URL}/auth/logout`, {
       method: "POST",
       credentials: "include",
