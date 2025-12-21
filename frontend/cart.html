@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-Shop - Shopping Cart</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .cart-container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #eaeaea;
+      }
+
+      .cart-header h1 {
+        margin: 0;
+        color: #2d3748;
+        font-size: 2rem;
+      }
+
+      .continue-shopping {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .cart-content {
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
+      }
+
+      .cart-items {
+        flex: 1;
+      }
+
+      .cart-summary {
+        width: 350px;
+        position: sticky;
+        top: 20px;
+      }
+
+      .cart-item {
+        display: flex;
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        gap: 20px;
+      }
+
+      .item-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 8px;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .item-details {
+        flex: 1;
+      }
+
+      .item-name {
+        margin: 0 0 10px 0;
+        font-size: 1.2rem;
+        color: #2d3748;
+      }
+
+      .item-category {
+        display: inline-block;
+        padding: 4px 10px;
+        background: #edf2f7;
+        color: #4a5568;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .item-price {
+        color: #667eea;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+      }
+
+      .item-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #f7fafc;
+        padding: 8px 12px;
+        border-radius: 8px;
+      }
+
+      .quantity-btn {
+        width: 30px;
+        height: 30px;
+        border: none;
+        background: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .quantity-input {
+        width: 50px;
+        text-align: center;
+        border: none;
+        background: transparent;
+        font-weight: 600;
+        font-size: 1rem;
+      }
+
+      .remove-item {
+        color: #fc8181;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.2rem;
+        padding: 5px;
+      }
+
+      .item-total {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2d3748;
+        min-width: 100px;
+        text-align: right;
+      }
+
+      .summary-card {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .summary-card h3 {
+        margin: 0 0 20px 0;
+        color: #2d3748;
+        font-size: 1.5rem;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f1f1f1;
+      }
+
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        padding: 10px 0;
+      }
+
+      .summary-row.total {
+        border-top: 2px solid #eaeaea;
+        margin-top: 15px;
+        padding-top: 20px;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2d3748;
+      }
+
+      .summary-label {
+        color: #718096;
+      }
+
+      .summary-value {
+        font-weight: 600;
+        color: #2d3748;
+      }
+
+      .btn-checkout {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: transform 0.3s ease;
+      }
+
+      .btn-checkout:hover {
+        transform: translateY(-2px);
+      }
+
+      .empty-cart {
+        text-align: center;
+        padding: 60px 20px;
+      }
+
+      .empty-cart i {
+        font-size: 4rem;
+        color: #cbd5e0;
+        margin-bottom: 20px;
+      }
+
+      .empty-cart h3 {
+        margin: 0 0 15px 0;
+        color: #2d3748;
+        font-size: 1.5rem;
+      }
+
+      .empty-cart p {
+        color: #718096;
+        margin-bottom: 30px;
+      }
+
+      .btn-shopping {
+        display: inline-block;
+        padding: 12px 30px;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .btn-shopping:hover {
+        background: #5a67d8;
+        transform: translateY(-2px);
+      }
+
+      .loading-cart {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 300px;
+      }
+
+      .loading-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .cart-content {
+          flex-direction: column;
+        }
+
+        .cart-summary {
+          width: 100%;
+        }
+
+        .cart-item {
+          flex-direction: column;
+        }
+
+        .item-image {
+          width: 100%;
+          height: 200px;
+        }
+
+        .item-total {
+          text-align: left;
+          margin-top: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="navbar">
+        <div class="logo">
+          <i class="fas fa-shopping-bag"></i>
+          <span>E-Shop</span>
+        </div>
+        <div class="nav-links">
+          <a href="dashboard.html"> <i class="fas fa-home"></i> Dashboard </a>
+          <a href="products.html"> <i class="fas fa-box"></i> Products </a>
+          <a href="cart.html" class="active">
+            <i class="fas fa-shopping-cart"></i> Cart
+            <span class="cart-count">0</span>
+          </a>
+          <a href="orders.html"> <i class="fas fa-receipt"></i> Orders </a>
+          <a href="#" id="logoutBtn" style="color: #fc8181">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+        </div>
+      </nav>
+
+      <div class="cart-container">
+        <div class="cart-header">
+          <h1>Your Shopping Cart</h1>
+          <a href="products.html" class="continue-shopping">
+            <i class="fas fa-arrow-left"></i>
+            Continue Shopping
+          </a>
+        </div>
+
+        <div class="cart-content">
+          <div class="cart-items" id="cartItems">
+            <!-- Cart items will be loaded here -->
+            <div class="loading-cart">
+              <div class="loading-spinner"></div>
+            </div>
+          </div>
+
+          <div class="cart-summary">
+            <div class="summary-card">
+              <h3>Order Summary</h3>
+              <div class="summary-row">
+                <span class="summary-label">Subtotal</span>
+                <span class="summary-value" id="subtotal">$0.00</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-label">Shipping</span>
+                <span class="summary-value">$5.00</span>
+              </div>
+              <div class="summary-row total">
+                <span class="summary-label">Total</span>
+                <span class="summary-value" id="total">$5.00</span>
+              </div>
+              <button class="btn-checkout" id="checkoutBtn">
+                <i class="fas fa-lock"></i>
+                Proceed to Checkout
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" id="loadingModal">
+        <div class="modal-content">
+          <div class="loader"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+
+      <div class="toast" id="messageToast"></div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/cart.js"></script>
+  </body>
+</html>

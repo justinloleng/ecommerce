@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-Shop - Checkout</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .checkout-container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .checkout-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #eaeaea;
+      }
+
+      .checkout-header h1 {
+        margin: 0;
+        color: #2d3748;
+        font-size: 2rem;
+      }
+
+      .checkout-steps {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 40px;
+        gap: 40px;
+      }
+
+      .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        color: #718096;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+      }
+
+      .step.active .step-circle {
+        background: #667eea;
+        color: white;
+      }
+
+      .step.completed .step-circle {
+        background: #48bb78;
+        color: white;
+      }
+
+      .step.completed .step-circle i {
+        display: block;
+      }
+
+      .step.completed .step-circle span {
+        display: none;
+      }
+
+      .step-circle i {
+        display: none;
+      }
+
+      .step-label {
+        font-size: 0.9rem;
+        color: #718096;
+        font-weight: 600;
+      }
+
+      .step.active .step-label {
+        color: #667eea;
+      }
+
+      .checkout-content {
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
+      }
+
+      .checkout-form {
+        flex: 1;
+      }
+
+      .order-summary {
+        width: 400px;
+        position: sticky;
+        top: 20px;
+      }
+
+      .form-section {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .form-section h3 {
+        margin: 0 0 20px 0;
+        color: #2d3748;
+        font-size: 1.3rem;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f1f1f1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #4a5568;
+      }
+
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 20px;
+      }
+
+      .form-row .form-group {
+        flex: 1;
+      }
+
+      .payment-methods {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .payment-method {
+        flex: 1;
+      }
+
+      .payment-method input {
+        display: none;
+      }
+
+      .payment-method label {
+        display: block;
+        padding: 20px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .payment-method input:checked + label {
+        border-color: #667eea;
+        background: #f7fafc;
+      }
+
+      .payment-method i {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        color: #667eea;
+      }
+
+      .payment-proof {
+        display: none;
+        margin-top: 20px;
+        padding: 20px;
+        background: #f7fafc;
+        border-radius: 8px;
+        border: 2px dashed #cbd5e0;
+      }
+
+      .payment-proof.active {
+        display: block;
+      }
+
+      .file-upload {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+      }
+
+      .file-upload input[type="file"] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+      }
+
+      .file-upload-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 20px;
+        background: white;
+        border: 2px solid #667eea;
+        border-radius: 8px;
+        color: #667eea;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .file-upload-label:hover {
+        background: #667eea;
+        color: white;
+      }
+
+      .file-name {
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: #718096;
+      }
+
+      .summary-card {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .summary-items {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+      }
+
+      .summary-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 0;
+        border-bottom: 1px solid #eaeaea;
+      }
+
+      .summary-item:last-child {
+        border-bottom: none;
+      }
+
+      .item-info {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .item-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .item-name {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 5px;
+      }
+
+      .item-quantity {
+        color: #718096;
+        font-size: 0.9rem;
+      }
+
+      .item-price {
+        font-weight: 700;
+        color: #667eea;
+      }
+
+      .summary-total {
+        border-top: 2px solid #eaeaea;
+        padding-top: 20px;
+        margin-top: 20px;
+      }
+
+      .total-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+      }
+
+      .total-row.final {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 2px solid #eaeaea;
+      }
+
+      .btn-place-order {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: transform 0.3s ease;
+      }
+
+      .btn-place-order:hover {
+        transform: translateY(-2px);
+      }
+
+      .btn-place-order:disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .loading-checkout {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 300px;
+      }
+
+      .loading-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .checkout-content {
+          flex-direction: column;
+        }
+
+        .order-summary {
+          width: 100%;
+        }
+
+        .form-row {
+          flex-direction: column;
+          gap: 0;
+        }
+
+        .payment-methods {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="navbar">
+        <div class="logo">
+          <i class="fas fa-shopping-bag"></i>
+          <span>E-Shop</span>
+        </div>
+        <div class="nav-links">
+          <a href="dashboard.html"> <i class="fas fa-home"></i> Dashboard </a>
+          <a href="products.html"> <i class="fas fa-box"></i> Products </a>
+          <a href="cart.html">
+            <i class="fas fa-shopping-cart"></i> Cart
+            <span class="cart-count">0</span>
+          </a>
+          <a href="orders.html" class="active">
+            <i class="fas fa-receipt"></i> Orders
+          </a>
+          <a href="#" id="logoutBtn" style="color: #fc8181">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+        </div>
+      </nav>
+
+      <div class="checkout-container">
+        <div class="checkout-header">
+          <h1>Checkout</h1>
+        </div>
+
+        <div class="checkout-steps">
+          <div class="step completed">
+            <div class="step-circle">
+              <i class="fas fa-check"></i>
+              <span>1</span>
+            </div>
+            <span class="step-label">Cart</span>
+          </div>
+          <div class="step active">
+            <div class="step-circle">
+              <span>2</span>
+            </div>
+            <span class="step-label">Checkout</span>
+          </div>
+          <div class="step">
+            <div class="step-circle">
+              <span>3</span>
+            </div>
+            <span class="step-label">Confirmation</span>
+          </div>
+        </div>
+
+        <div class="checkout-content">
+          <div class="checkout-form">
+            <form id="checkoutForm">
+              <!-- Shipping Information -->
+              <div class="form-section">
+                <h3><i class="fas fa-truck"></i> Shipping Information</h3>
+                <div class="form-group">
+                  <label for="fullName">Full Name</label>
+                  <input
+                    type="text"
+                    id="fullName"
+                    name="fullName"
+                    required
+                    placeholder="Enter your full name"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="email">Email Address</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    required
+                    placeholder="Enter your email"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="phone">Phone Number</label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    required
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="address">Shipping Address</label>
+                  <textarea
+                    id="address"
+                    name="address"
+                    required
+                    placeholder="Enter your complete shipping address"
+                  ></textarea>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="city">City</label>
+                    <input
+                      type="text"
+                      id="city"
+                      name="city"
+                      required
+                      placeholder="Enter city"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="zipCode">ZIP Code</label>
+                    <input
+                      type="text"
+                      id="zipCode"
+                      name="zipCode"
+                      required
+                      placeholder="Enter ZIP code"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="country">Country</label>
+                  <select id="country" name="country" required>
+                    <option value="">Select Country</option>
+                    <option value="US">United States</option>
+                    <option value="UK">United Kingdom</option>
+                    <option value="CA">Canada</option>
+                    <option value="PH">Philippines</option>
+                    <option value="AU">Australia</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Payment Method -->
+              <div class="form-section">
+                <h3><i class="fas fa-credit-card"></i> Payment Method</h3>
+
+                <div class="payment-methods">
+                  <div class="payment-method">
+                    <input
+                      type="radio"
+                      id="cashOnDelivery"
+                      name="paymentMethod"
+                      value="cash_on_delivery"
+                      checked
+                    />
+                    <label for="cashOnDelivery">
+                      <i class="fas fa-money-bill-wave"></i>
+                      <div>Cash on Delivery</div>
+                    </label>
+                  </div>
+
+                  <div class="payment-method">
+                    <input
+                      type="radio"
+                      id="onlinePayment"
+                      name="paymentMethod"
+                      value="online_payment"
+                    />
+                    <label for="onlinePayment">
+                      <i class="fas fa-university"></i>
+                      <div>Online Payment</div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Payment Proof Upload (for online payment) -->
+                <div class="payment-proof" id="paymentProofSection">
+                  <div class="form-group">
+                    <label>Upload Payment Proof</label>
+                    <div class="file-upload">
+                      <input
+                        type="file"
+                        id="paymentProof"
+                        accept="image/*,.pdf"
+                      />
+                      <label for="paymentProof" class="file-upload-label">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        Choose File
+                      </label>
+                    </div>
+                    <div class="file-name" id="fileName">No file chosen</div>
+                    <small
+                      style="color: #718096; margin-top: 10px; display: block"
+                    >
+                      Upload screenshot of payment confirmation (JPG, PNG, or
+                      PDF)
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="order-summary">
+            <div class="summary-card">
+              <h3>Order Summary</h3>
+
+              <div class="summary-items" id="orderItems">
+                <!-- Order items will be loaded here -->
+                <div class="loading-checkout">
+                  <div class="loading-spinner"></div>
+                </div>
+              </div>
+
+              <div class="summary-total">
+                <div class="total-row">
+                  <span>Subtotal</span>
+                  <span id="summarySubtotal">$0.00</span>
+                </div>
+                <div class="total-row">
+                  <span>Shipping</span>
+                  <span>$5.00</span>
+                </div>
+                <div class="total-row final">
+                  <span>Total</span>
+                  <span id="summaryTotal">$5.00</span>
+                </div>
+              </div>
+
+              <button class="btn-place-order" id="placeOrderBtn">
+                <i class="fas fa-check-circle"></i>
+                Place Order
+              </button>
+
+              <p
+                style="
+                  text-align: center;
+                  color: #718096;
+                  font-size: 0.9rem;
+                  margin-top: 15px;
+                "
+              >
+                <i class="fas fa-lock"></i> Your payment information is secure
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" id="loadingModal">
+        <div class="modal-content">
+          <div class="loader"></div>
+          <p>Processing...</p>
+        </div>
+      </div>
+
+      <div class="toast" id="messageToast"></div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/checkout.js"></script>
+  </body>
+</html>

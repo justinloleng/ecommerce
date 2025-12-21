@@ -71,6 +71,9 @@
         transition: transform 0.3s ease;
         cursor: pointer;
         border: 2px solid transparent;
+        text-decoration: none;
+        color: inherit;
+        display: block;
       }
 
       .action-card:hover {
@@ -94,6 +97,78 @@
         margin: 0;
         font-size: 0.9rem;
       }
+
+      /* Modal and Toast styles */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        max-width: 90%;
+        box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+        text-align: center;
+      }
+
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .toast {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 24px;
+        background: #48bb78;
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1001;
+        max-width: 300px;
+      }
+
+      .toast-error {
+        background: #fc8181;
+      }
+
+      .toast-info {
+        background: #4299e1;
+      }
+
+      .toast-warning {
+        background: #ed8936;
+      }
     </style>
   </head>
   <body>
@@ -104,21 +179,27 @@
           <span>E-Shop Dashboard</span>
         </div>
         <div class="nav-links">
-          <a href="#" id="homeLink"><i class="fas fa-home"></i> Home</a>
-          <a href="products.html" id="productsLink"
-            ><i class="fas fa-box"></i> Products</a
-          >
-          <a href="#" id="cartLink"
-            ><i class="fas fa-shopping-cart"></i> Cart</a
-          >
-          <a href="#" id="ordersLink"><i class="fas fa-receipt"></i> Orders</a>
+          <a href="dashboard.html" id="homeLink" class="active">
+            <i class="fas fa-home"></i> Home
+          </a>
+          <a href="products.html" id="productsLink">
+            <i class="fas fa-box"></i> Products
+          </a>
+          <a href="cart.html" id="cartLink">
+            <i class="fas fa-shopping-cart"></i> Cart
+          </a>
+          <a href="orders.html" id="ordersLink">
+            <i class="fas fa-receipt"></i> Orders
+          </a>
           <a href="#" id="logoutBtn" style="color: #fc8181">
             <i class="fas fa-sign-out-alt"></i> Logout
           </a>
         </div>
       </nav>
 
-      <div class="dashboard" id="dashboardContent"></div>
+      <div class="dashboard" id="dashboardContent">
+        <!-- Dashboard content will be loaded here -->
+      </div>
 
       <div class="modal" id="loadingModal">
         <div class="modal-content">
@@ -130,11 +211,23 @@
       <div class="toast" id="messageToast"></div>
     </div>
 
-    <script src="js/auth.js"></script>
     <script>
+      // Configuration
+      const API_BASE_URL = "http://127.0.0.1:5000/api";
+
       document.addEventListener("DOMContentLoaded", function () {
+        // Check authentication
+        checkAuthStatus();
+
+        // Load user info
         loadUserInfo();
 
+        // Setup navigation
+        setupNavigation();
+      });
+
+      function setupNavigation() {
+        // Logout button
         document
           .getElementById("logoutBtn")
           .addEventListener("click", function (e) {
@@ -142,107 +235,122 @@
             logout();
           });
 
-        document
-          .getElementById("homeLink")
-          .addEventListener("click", function (e) {
-            e.preventDefault();
-            loadUserInfo();
-          });
+        // Update cart count
+        updateCartCount();
+      }
 
-        ["cartLink", "ordersLink"].forEach((id) => {
-          document.getElementById(id).addEventListener("click", function (e) {
-            e.preventDefault();
-            showToast("Feature coming soon!", "info");
-          });
-        });
-      });
+      function checkAuthStatus() {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) {
+          window.location.href = "index.html";
+          return false;
+        }
+        return true;
+      }
 
       async function loadUserInfo() {
         try {
           showLoading();
 
-          const response = await fetch(`${API_BASE_URL}/auth/me`, {
-            method: "GET",
-            credentials: "include",
-          });
+          // Get user from localStorage (fallback if API fails)
+          const user = JSON.parse(localStorage.getItem("user"));
 
-          if (response.ok) {
-            const data = await response.json();
-            const user = data.user;
-
-            const dashboardHTML = `
-                        <div class="user-info">
-                            <div class="user-details">
-                                <h2>Welcome back, ${user.first_name}!</h2>
-                                <p>${user.email}</p>
-                                <div class="user-stats">
-                                    <div class="stat">
-                                        <span class="stat-number">0</span>
-                                        <span class="stat-label">Orders</span>
-                                    </div>
-                                    <div class="stat">
-                                        <span class="stat-number">0</span>
-                                        <span class="stat-label">Cart Items</span>
-                                    </div>
-                                    <div class="stat">
-                                        <span class="stat-number">Member</span>
-                                        <span class="stat-label">Status</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="user-avatar">
-                                <div style="background: white; color: #667eea; width: 80px; height: 80px; 
-                                     border-radius: 50%; display: flex; align-items: center; 
-                                     justify-content: center; font-size: 2rem; font-weight: bold;">
-                                    ${user.first_name.charAt(
-                                      0
-                                    )}${user.last_name.charAt(0)}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="dashboard-actions">
-                           <a href="products.html" style="text-decoration: none; color: inherit;">
-                              <div class="action-card">
-                                  <div class="action-icon">
-                                      <i class="fas fa-box"></i>
-                                  </div>
-                                  <h3>Browse Products</h3>
-                                  <p>Explore our wide range of products</p>
-                              </div>
-                          </a>
-                            
-                            <div class="action-card" onclick="showToast('Feature coming soon!', 'info')">
-                                <div class="action-icon">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </div>
-                                <h3>My Cart</h3>
-                                <p>View and manage your shopping cart</p>
-                            </div>
-                            
-                            <div class="action-card" onclick="showToast('Feature coming soon!', 'info')">
-                                <div class="action-icon">
-                                    <i class="fas fa-receipt"></i>
-                                </div>
-                                <h3>My Orders</h3>
-                                <p>Track and manage your orders</p>
-                            </div>
-                            
-                            <div class="action-card" onclick="showToast('Feature coming soon!', 'info')">
-                                <div class="action-icon">
-                                    <i class="fas fa-user-cog"></i>
-                                </div>
-                                <h3>Profile Settings</h3>
-                                <p>Update your account information</p>
-                            </div>
-                        </div>
-                    `;
-
-            document.getElementById("dashboardContent").innerHTML =
-              dashboardHTML;
-          } else {
+          if (!user) {
             window.location.href = "index.html";
+            return;
           }
+
+          // Get cart count
+          const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+          const cartCount = cart.reduce(
+            (total, item) => total + (item.quantity || 1),
+            0
+          );
+
+          // Try to get order count from API
+          let orderCount = 0;
+          try {
+            const response = await fetch(
+              `${API_BASE_URL}/orders/user/${user.id}`,
+              {
+                credentials: "include",
+              }
+            );
+            if (response.ok) {
+              const orders = await response.json();
+              orderCount = orders.length;
+            }
+          } catch (error) {
+            console.log("Could not fetch orders:", error);
+          }
+
+          const dashboardHTML = `
+            <div class="user-info">
+              <div class="user-details">
+                <h2>Welcome back, ${
+                  user.name || user.first_name || user.email
+                }!</h2>
+                <p>${user.email}</p>
+                <div class="user-stats">
+                  <div class="stat">
+                    <span class="stat-number">${orderCount}</span>
+                    <span class="stat-label">Orders</span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-number">${cartCount}</span>
+                    <span class="stat-label">Cart Items</span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-number">Member</span>
+                    <span class="stat-label">Status</span>
+                  </div>
+                </div>
+              </div>
+              <div class="user-avatar">
+                <div style="background: white; color: #667eea; width: 80px; height: 80px; 
+                     border-radius: 50%; display: flex; align-items: center; 
+                     justify-content: center; font-size: 2rem; font-weight: bold;">
+                  ${user.first_name ? user.first_name.charAt(0) : "U"}
+                </div>
+              </div>
+            </div>
+            
+            <div class="dashboard-actions">
+              <a href="products.html" class="action-card">
+                <div class="action-icon">
+                  <i class="fas fa-box"></i>
+                </div>
+                <h3>Browse Products</h3>
+                <p>Explore our wide range of products</p>
+              </a>
+              
+              <a href="cart.html" class="action-card">
+                <div class="action-icon">
+                  <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h3>My Cart</h3>
+                <p>View and manage your shopping cart (${cartCount} items)</p>
+              </a>
+              
+              <a href="orders.html" class="action-card">
+                <div class="action-icon">
+                  <i class="fas fa-receipt"></i>
+                </div>
+                <h3>My Orders</h3>
+                <p>Track and manage your orders (${orderCount} orders)</p>
+              </a>
+              
+              <a href="#" class="action-card" onclick="showToast('Profile settings coming soon!', 'info'); return false;">
+                <div class="action-icon">
+                  <i class="fas fa-user-cog"></i>
+                </div>
+                <h3>Profile Settings</h3>
+                <p>Update your account information</p>
+              </a>
+            </div>
+          `;
+
+          document.getElementById("dashboardContent").innerHTML = dashboardHTML;
         } catch (error) {
           console.error("Error loading user info:", error);
           showToast("Error loading dashboard", "error");
@@ -250,6 +358,64 @@
           hideLoading();
         }
       }
+
+      function logout() {
+        if (confirm("Are you sure you want to logout?")) {
+          localStorage.removeItem("user");
+          localStorage.removeItem("cart");
+          localStorage.removeItem("token");
+          localStorage.removeItem("wishlist");
+          window.location.href = "index.html";
+        }
+      }
+
+      function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+        // Update cart count in navigation if element exists
+        const cartCountElements = document.querySelectorAll(".cart-count");
+        cartCountElements.forEach((element) => {
+          if (element) {
+            element.textContent = totalItems;
+            element.style.display = totalItems > 0 ? "inline-block" : "none";
+          }
+        });
+      }
+
+      function showLoading() {
+        const loadingModal = document.getElementById("loadingModal");
+        if (loadingModal) {
+          loadingModal.style.display = "flex";
+        }
+      }
+
+      function hideLoading() {
+        const loadingModal = document.getElementById("loadingModal");
+        if (loadingModal) {
+          loadingModal.style.display = "none";
+        }
+      }
+
+      function showToast(message, type = "info") {
+        const toast = document.getElementById("messageToast");
+        if (toast) {
+          toast.textContent = message;
+          toast.className = `toast toast-${type}`;
+          toast.style.display = "block";
+
+          setTimeout(() => {
+            toast.style.display = "none";
+          }, 3000);
+        }
+      }
+
+      // Make functions available globally
+      window.checkAuthStatus = checkAuthStatus;
+      window.logout = logout;
+      window.showLoading = showLoading;
+      window.hideLoading = hideLoading;
+      window.showToast = showToast;
     </script>
   </body>
 </html>

@@ -482,11 +482,11 @@
           <a href="products.html" class="active">
             <i class="fas fa-box"></i> Products
           </a>
-          <a href="#" id="cartLink">
+          <a href="cart.html" id="cartLink">
             <i class="fas fa-shopping-cart"></i> Cart
             <span class="cart-count">0</span>
           </a>
-          <a href="#" id="ordersLink">
+          <a href="orders.html" id="ordersLink">
             <i class="fas fa-receipt"></i> Orders
           </a>
           <a href="#" id="logoutBtn" style="color: #fc8181">
@@ -690,20 +690,23 @@
       });
 
       function setupNavigation() {
-        // Cart link
+        // Update cart count
+        updateCartCount();
+
+        // Cart link - simplified direct navigation
         document
           .getElementById("cartLink")
           .addEventListener("click", function (e) {
             e.preventDefault();
-            showToast("Cart feature coming soon!", "info");
+            window.location.href = "cart.html";
           });
 
-        // Orders link
+        // Orders link - simplified direct navigation
         document
           .getElementById("ordersLink")
           .addEventListener("click", function (e) {
             e.preventDefault();
-            showToast("Orders feature coming soon!", "info");
+            window.location.href = "orders.html";
           });
 
         // Logout
@@ -1222,6 +1225,60 @@
             totalItems > 0 ? "inline-block" : "none";
         }
       }
+      // Auth check function
+      function checkAuthStatus() {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user) {
+          window.location.href = "index.html";
+          return false;
+        }
+        return true;
+      }
+
+      // Logout function
+      function logout() {
+        localStorage.removeItem("user");
+        localStorage.removeItem("cart");
+        localStorage.removeItem("token");
+        localStorage.removeItem("wishlist");
+        window.location.href = "index.html";
+      }
+
+      // Loading functions
+      function showLoading() {
+        const loadingModal = document.getElementById("loadingModal");
+        if (loadingModal) {
+          loadingModal.style.display = "flex";
+        }
+      }
+
+      function hideLoading() {
+        const loadingModal = document.getElementById("loadingModal");
+        if (loadingModal) {
+          loadingModal.style.display = "none";
+        }
+      }
+
+      // Toast function
+      function showToast(message, type = "info") {
+        const toast = document.getElementById("messageToast");
+        if (toast) {
+          toast.textContent = message;
+          toast.className = `toast toast-${type}`;
+          toast.style.display = "block";
+
+          setTimeout(() => {
+            toast.style.display = "none";
+          }, 3000);
+        }
+      }
+
+      // Make sure these functions are available globally
+      window.checkAuthStatus = checkAuthStatus;
+      window.logout = logout;
+      window.showLoading = showLoading;
+      window.hideLoading = hideLoading;
+      window.showToast = showToast;
 
       // Make functions available globally
       window.addToCart = addToCart;

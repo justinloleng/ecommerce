@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-Shop - My Orders</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .orders-container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .orders-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #eaeaea;
+      }
+
+      .orders-header h1 {
+        margin: 0;
+        color: #2d3748;
+        font-size: 2rem;
+      }
+
+      .orders-filters {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .status-filter select {
+        padding: 10px 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        background: white;
+        font-size: 0.95rem;
+        color: #4a5568;
+      }
+
+      .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .order-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+      }
+
+      .order-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f1f1f1;
+      }
+
+      .order-info h3 {
+        margin: 0 0 10px 0;
+        color: #2d3748;
+        font-size: 1.3rem;
+      }
+
+      .order-meta {
+        color: #718096;
+        font-size: 0.9rem;
+      }
+
+      .order-status {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .status-pending {
+        background: #fed7d7;
+        color: #c53030;
+      }
+
+      .status-processing {
+        background: #feebc8;
+        color: #c05621;
+      }
+
+      .status-shipped {
+        background: #c6f6d5;
+        color: #276749;
+      }
+
+      .status-delivered {
+        background: #bee3f8;
+        color: #2c5282;
+      }
+
+      .status-cancelled {
+        background: #e2e8f0;
+        color: #4a5568;
+      }
+
+      .order-items {
+        margin-bottom: 20px;
+      }
+
+      .order-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px;
+        border-bottom: 1px solid #eaeaea;
+        align-items: center;
+      }
+
+      .order-item:last-child {
+        border-bottom: none;
+      }
+
+      .item-preview {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .item-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .item-details h4 {
+        margin: 0 0 5px 0;
+        color: #2d3748;
+        font-size: 1rem;
+      }
+
+      .item-quantity {
+        color: #718096;
+        font-size: 0.9rem;
+      }
+
+      .item-price {
+        font-weight: 700;
+        color: #667eea;
+      }
+
+      .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 20px;
+        border-top: 2px solid #f1f1f1;
+      }
+
+      .order-total {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2d3748;
+      }
+
+      .order-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn-view-details {
+        padding: 10px 20px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.3s ease;
+      }
+
+      .btn-view-details:hover {
+        background: #5a67d8;
+      }
+
+      .btn-track {
+        padding: 10px 20px;
+        background: #edf2f7;
+        color: #4a5568;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.3s ease;
+      }
+
+      .btn-track:hover {
+        background: #e2e8f0;
+      }
+
+      .no-orders {
+        text-align: center;
+        padding: 60px 20px;
+        color: #718096;
+      }
+
+      .no-orders i {
+        font-size: 4rem;
+        color: #cbd5e0;
+        margin-bottom: 20px;
+      }
+
+      .no-orders h3 {
+        margin: 0 0 15px 0;
+        font-size: 1.5rem;
+      }
+
+      .btn-shopping {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 12px 30px;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .btn-shopping:hover {
+        background: #5a67d8;
+        transform: translateY(-2px);
+      }
+
+      .loading-orders {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 300px;
+      }
+
+      .loading-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Order Details Modal */
+      .modal-content.order-details {
+        max-width: 800px;
+        padding: 0;
+      }
+
+      .order-details-header {
+        padding: 25px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px 12px 0 0;
+      }
+
+      .order-details-header h2 {
+        margin: 0 0 10px 0;
+        font-size: 1.8rem;
+      }
+
+      .order-details-body {
+        padding: 25px;
+      }
+
+      .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .details-section h3 {
+        margin: 0 0 15px 0;
+        color: #2d3748;
+        font-size: 1.2rem;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f1f1f1;
+      }
+
+      .details-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #eaeaea;
+      }
+
+      .details-row:last-child {
+        border-bottom: none;
+      }
+
+      .details-label {
+        color: #718096;
+      }
+
+      .details-value {
+        font-weight: 600;
+        color: #2d3748;
+      }
+
+      @media (max-width: 768px) {
+        .orders-header {
+          flex-direction: column;
+          gap: 15px;
+          align-items: stretch;
+        }
+
+        .order-header {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .order-footer {
+          flex-direction: column;
+          gap: 15px;
+          align-items: stretch;
+        }
+
+        .order-actions {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="navbar">
+        <div class="logo">
+          <i class="fas fa-shopping-bag"></i>
+          <span>E-Shop</span>
+        </div>
+        <div class="nav-links">
+          <a href="dashboard.html"> <i class="fas fa-home"></i> Dashboard </a>
+          <a href="products.html"> <i class="fas fa-box"></i> Products </a>
+          <a href="cart.html">
+            <i class="fas fa-shopping-cart"></i> Cart
+            <span class="cart-count">0</span>
+          </a>
+          <a href="orders.html" class="active">
+            <i class="fas fa-receipt"></i> Orders
+          </a>
+          <a href="#" id="logoutBtn" style="color: #fc8181">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+        </div>
+      </nav>
+
+      <div class="orders-container">
+        <div class="orders-header">
+          <h1>My Orders</h1>
+          <div class="orders-filters">
+            <div class="status-filter">
+              <select id="statusFilter">
+                <option value="all">All Orders</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="orders-list" id="ordersList">
+          <div class="loading-orders">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" id="loadingModal">
+        <div class="modal-content">
+          <div class="loader"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+
+      <div class="toast" id="messageToast"></div>
+
+      <div class="modal" id="orderDetailsModal">
+        <div class="modal-content order-details" id="orderDetailsContent"></div>
+      </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+  </body>
+</html>
