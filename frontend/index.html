@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-commerce - Register & Login</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <nav class="navbar">
+        <div class="logo">
+          <i class="fas fa-shopping-bag"></i>
+          <span>E-Shop</span>
+        </div>
+        <div class="nav-links">
+          <a href="#" class="active" id="showLogin">Login</a>
+          <a href="#" id="showRegister">Register</a>
+          <a href="#"><i class="fas fa-shopping-cart"></i> Cart</a>
+        </div>
+      </nav>
+
+      <div class="main-content">
+       
+        <div class="hero">
+          <h1>Welcome to E-Shop</h1>
+          <p>Your one-stop destination for all shopping needs</p>
+        </div>
+
+        <div class="forms-container">
+         
+          <div class="form-wrapper active" id="loginForm">
+            <div class="form-header">
+              <h2><i class="fas fa-sign-in-alt"></i> Login</h2>
+              <p>Welcome back! Please enter your details</p>
+            </div>
+
+            <form id="loginFormElement">
+              <div class="form-group">
+                <label for="loginEmail">
+                  <i class="fas fa-envelope"></i> Email Address
+                </label>
+                <input
+                  type="email"
+                  id="loginEmail"
+                  name="email"
+                  required
+                  placeholder="Enter your email"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="loginPassword">
+                  <i class="fas fa-lock"></i> Password
+                </label>
+                <div class="password-input">
+                  <input
+                    type="password"
+                    id="loginPassword"
+                    name="password"
+                    required
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    class="toggle-password"
+                    data-target="loginPassword"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-options">
+                <label class="checkbox">
+                  <input type="checkbox" name="remember" />
+                  <span>Remember me</span>
+                </label>
+                <a href="#" class="forgot-password">Forgot Password?</a>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+              </button>
+
+              <div class="form-footer">
+                <p>
+                  Don't have an account?
+                  <a href="#" class="switch-form" data-form="register"
+                    >Sign up here</a
+                  >
+                </p>
+              </div>
+            </form>
+          </div>
+
+          
+          <div class="form-wrapper" id="registerForm">
+            <div class="form-header">
+              <h2><i class="fas fa-user-plus"></i> Create Account</h2>
+              <p>Join us today! Fill in your details</p>
+            </div>
+
+            <form id="registerFormElement">
+              <div class="row">
+                <div class="form-group">
+                  <label for="firstName">
+                    <i class="fas fa-user"></i> First Name
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="first_name"
+                    required
+                    placeholder="Enter first name"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="lastName">
+                    <i class="fas fa-user"></i> Last Name
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="last_name"
+                    required
+                    placeholder="Enter last name"
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="username">
+                  <i class="fas fa-at"></i> Username
+                </label>
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  required
+                  placeholder="Choose a username"
+                />
+                <div class="input-feedback" id="usernameFeedback"></div>
+              </div>
+
+              <div class="form-group">
+                <label for="email">
+                  <i class="fas fa-envelope"></i> Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  placeholder="Enter your email"
+                />
+                <div class="input-feedback" id="emailFeedback"></div>
+              </div>
+
+              <div class="form-group">
+                <label for="password">
+                  <i class="fas fa-lock"></i> Password
+                </label>
+                <div class="password-input">
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    required
+                    placeholder="Create a password (min. 6 chars)"
+                  />
+                  <button
+                    type="button"
+                    class="toggle-password"
+                    data-target="password"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+                <div class="password-strength">
+                  <div class="strength-bar">
+                    <div class="strength-fill" id="passwordStrength"></div>
+                  </div>
+                  <span class="strength-text" id="passwordStrengthText"
+                    >Weak</span
+                  >
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="confirmPassword">
+                  <i class="fas fa-lock"></i> Confirm Password
+                </label>
+                <div class="password-input">
+                  <input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirm_password"
+                    required
+                    placeholder="Confirm your password"
+                  />
+                  <button
+                    type="button"
+                    class="toggle-password"
+                    data-target="confirmPassword"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+                <div class="input-feedback" id="confirmPasswordFeedback"></div>
+              </div>
+
+              <div class="form-group">
+                <label for="phone">
+                  <i class="fas fa-phone"></i> Phone Number
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  placeholder="Enter phone number (optional)"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="address">
+                  <i class="fas fa-home"></i> Address
+                </label>
+                <textarea
+                  id="address"
+                  name="address"
+                  rows="3"
+                  placeholder="Enter your address (optional)"
+                ></textarea>
+              </div>
+
+              <div class="form-group checkbox-group">
+                <label class="checkbox">
+                  <input type="checkbox" name="terms" required />
+                  <span
+                    >I agree to the <a href="#">Terms & Conditions</a> and
+                    <a href="#">Privacy Policy</a></span
+                  >
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">
+                <i class="fas fa-user-plus"></i> Create Account
+              </button>
+
+              <div class="form-footer">
+                <p>
+                  Already have an account?
+                  <a href="#" class="switch-form" data-form="login"
+                    >Sign in here</a
+                  >
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" id="loadingModal">
+        <div class="modal-content">
+          <div class="loader"></div>
+          <p>Processing...</p>
+        </div>
+      </div>
+
+      <div class="toast" id="messageToast"></div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
