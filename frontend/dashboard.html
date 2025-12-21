@@ -105,7 +105,9 @@
         </div>
         <div class="nav-links">
           <a href="#" id="homeLink"><i class="fas fa-home"></i> Home</a>
-          <a href="#" id="productsLink"><i class="fas fa-box"></i> Products</a>
+          <a href="products.html" id="productsLink"
+            ><i class="fas fa-box"></i> Products</a
+          >
           <a href="#" id="cartLink"
             ><i class="fas fa-shopping-cart"></i> Cart</a
           >
@@ -116,11 +118,8 @@
         </div>
       </nav>
 
-      <div class="dashboard" id="dashboardContent">
-      
-      </div>
+      <div class="dashboard" id="dashboardContent"></div>
 
-     
       <div class="modal" id="loadingModal">
         <div class="modal-content">
           <div class="loader"></div>
@@ -128,17 +127,14 @@
         </div>
       </div>
 
-     
       <div class="toast" id="messageToast"></div>
     </div>
 
     <script src="js/auth.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-       
         loadUserInfo();
 
-       
         document
           .getElementById("logoutBtn")
           .addEventListener("click", function (e) {
@@ -146,7 +142,6 @@
             logout();
           });
 
-     
         document
           .getElementById("homeLink")
           .addEventListener("click", function (e) {
@@ -154,8 +149,7 @@
             loadUserInfo();
           });
 
-       
-        ["productsLink", "cartLink", "ordersLink"].forEach((id) => {
+        ["cartLink", "ordersLink"].forEach((id) => {
           document.getElementById(id).addEventListener("click", function (e) {
             e.preventDefault();
             showToast("Feature coming soon!", "info");
@@ -208,13 +202,15 @@
                         </div>
                         
                         <div class="dashboard-actions">
-                            <div class="action-card" onclick="showToast('Feature coming soon!', 'info')">
-                                <div class="action-icon">
-                                    <i class="fas fa-box"></i>
-                                </div>
-                                <h3>Browse Products</h3>
-                                <p>Explore our wide range of products</p>
-                            </div>
+                           <a href="products.html" style="text-decoration: none; color: inherit;">
+                              <div class="action-card">
+                                  <div class="action-icon">
+                                      <i class="fas fa-box"></i>
+                                  </div>
+                                  <h3>Browse Products</h3>
+                                  <p>Explore our wide range of products</p>
+                              </div>
+                          </a>
                             
                             <div class="action-card" onclick="showToast('Feature coming soon!', 'info')">
                                 <div class="action-icon">
