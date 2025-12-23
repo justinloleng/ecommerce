@@ -1,0 +1,291 @@
+/* Orders Page Specific Styles */
+.orders-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #eaeaea;
+}
+
+.orders-header h1 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.back-to-shop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.back-to-shop:hover {
+  background: #edf2f7;
+}
+
+.filter-section {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 10px 20px;
+  border: 2px solid #667eea;
+  background: white;
+  color: #667eea;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+  background: #667eea;
+  color: white;
+}
+
+.order-card {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.order-card:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.order-id {
+  font-weight: 700;
+  color: #333;
+  font-size: 18px;
+}
+
+.order-date {
+  color: #666;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.order-status {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-processing {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.status-shipped {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-in_transit {
+  background: #bee5eb;
+  color: #0c5460;
+}
+
+.status-delivered {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-declined {
+  background: #ffcccc;
+  color: #721c24;
+}
+
+.order-items {
+  margin: 15px 0;
+}
+
+.order-item {
+  display: flex;
+  gap: 15px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.order-item .item-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.order-item .item-details {
+  flex: 1;
+}
+
+.order-item .item-name {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.order-item .item-price {
+  color: #667eea;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.order-item .item-quantity {
+  color: #666;
+  font-size: 14px;
+}
+
+.order-total {
+  text-align: right;
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin: 15px 0;
+}
+
+.order-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btn-cancel {
+  padding: 10px 20px;
+  background: #fc8181;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.3s ease;
+}
+
+.btn-cancel:hover {
+  background: #f56565;
+}
+
+.btn-view-details,
+.btn-track {
+  padding: 10px 20px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.3s ease;
+}
+
+.btn-view-details:hover,
+.btn-track:hover {
+  background: #5568d3;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.empty-state i {
+  font-size: 80px;
+  color: #ddd;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .order-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-view-details,
+  .btn-track,
+  .btn-cancel {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filter-section {
+    justify-content: center;
+  }
+
+  .orders-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .order-item {
+    flex-direction: column;
+  }
+
+  .order-item .item-image {
+    width: 100%;
+    height: 150px;
+  }
+}
