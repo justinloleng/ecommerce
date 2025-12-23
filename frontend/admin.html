@@ -448,13 +448,13 @@
 
     <div class="tabs">
       <div class="tab-buttons">
-        <button class="tab-button active" onclick="switchTab('orders')">
+        <button class="tab-button active" onclick="switchTab('orders', event)">
           <i class="fas fa-shopping-cart"></i> Orders
         </button>
-        <button class="tab-button" onclick="switchTab('products')">
+        <button class="tab-button" onclick="switchTab('products', event)">
           <i class="fas fa-box"></i> Products
         </button>
-        <button class="tab-button" onclick="switchTab('categories')">
+        <button class="tab-button" onclick="switchTab('categories', event)">
           <i class="fas fa-tags"></i> Categories
         </button>
       </div>
@@ -718,7 +718,7 @@
       document.getElementById('adminName').textContent = user.first_name || user.username || 'Admin';
     }
 
-    function switchTab(tab) {
+    function switchTab(tab, event) {
       // Update tab buttons
       document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
       event.target.closest('.tab-button').classList.add('active');

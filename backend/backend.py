@@ -1183,6 +1183,7 @@ def update_product(product_id):
             return jsonify({'error': 'No fields to update'}), 400
         
         params.append(product_id)
+        # Safe to use f-string here: update_fields contains only validated field names from our whitelist above
         query = f"UPDATE products SET {', '.join(update_fields)} WHERE id = %s"
         
         cursor.execute(query, params)
@@ -1295,6 +1296,7 @@ def update_category(category_id):
             return jsonify({'error': 'No fields to update'}), 400
         
         params.append(category_id)
+        # Safe to use f-string here: update_fields contains only validated field names from our whitelist above
         query = f"UPDATE categories SET {', '.join(update_fields)} WHERE id = %s"
         
         cursor.execute(query, params)
