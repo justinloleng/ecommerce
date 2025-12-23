@@ -19,6 +19,16 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function setupNavigation() {
+  // Show admin link if user is admin
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (user && user.is_admin === 1) {
+    const adminLink = document.getElementById('adminDashboardLink');
+    if (adminLink) {
+      adminLink.style.display = 'block';
+      adminLink.href = 'admin.html';
+    }
+  }
+  
   // Logout
   document.getElementById("logoutBtn").addEventListener("click", function (e) {
     e.preventDefault();
