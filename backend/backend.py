@@ -851,7 +851,7 @@ def update_order_status(order_id):
         data = request.get_json()
         status = data.get('status')
         
-        valid_statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled']
+        valid_statuses = ['pending', 'processing', 'shipped', 'in_transit', 'delivered', 'cancelled', 'declined']
         
         if status not in valid_statuses:
             return jsonify({'error': 'Invalid status'}), 400
@@ -915,6 +915,440 @@ def upload_payment_proof(order_id):
     except Exception as e:
         print(f"❌ Upload payment proof error: {e}")
         return jsonify({'error': str(e)}), 500
+
+# ========== ORDER MANAGEMENT ENDPOINTS (CUSTOMER) ==========
+@app.route('/api/orders/<int:order_id>/cancel', methods=['PUT'])
+def cancel_order(order_id):
+    """Cancel order (customer action) - only for pending orders"""
+    try:
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Check if order exists and is pending
+        cursor.execute("SELECT status FROM orders WHERE id = %s", (order_id,))
+        order = cursor.fetchone()
+        
+        if not order:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Order not found'}), 404
+        
+        if order['status'] != 'pending':
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Only pending orders can be cancelled'}), 400
+        
+        # Update order status to cancelled
+        cursor.execute("UPDATE orders SET status = 'cancelled' WHERE id = %s", (order_id,))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'message': 'Order cancelled successfully'}), 200
+        
+    except Exception as e:
+        print(f"❌ Cancel order error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+# ========== ADMIN ENDPOINTS ==========
+@app.route('/api/admin/orders', methods=['GET'])
+def get_all_orders():
+    """Get all orders (admin view)"""
+    try:
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("""
+            SELECT o.*, 
+                   u.first_name, u.last_name, u.email,
+                   COUNT(oi.id) as item_count
+            FROM orders o
+            LEFT JOIN users u ON o.user_id = u.id
+            LEFT JOIN order_items oi ON o.id = oi.order_id
+            GROUP BY o.id
+            ORDER BY o.created_at DESC
+        """)
+        
+        orders = cursor.fetchall()
+        
+        # Get order items for each order
+        for order in orders:
+            cursor.execute("""
+                SELECT oi.*, p.name, p.image_url
+                FROM order_items oi
+                JOIN products p ON oi.product_id = p.id
+                WHERE oi.order_id = %s
+            """, (order['id'],))
+            
+            items = cursor.fetchall()
+            
+            # Convert Decimal to float
+            for item in items:
+                if 'price_at_time' in item and isinstance(item['price_at_time'], Decimal):
+                    item['price_at_time'] = float(item['price_at_time'])
+            
+            order['items'] = items
+        
+        cursor.close()
+        conn.close()
+        
+        # Convert Decimal to float
+        for order in orders:
+            if 'total_amount' in order and isinstance(order['total_amount'], Decimal):
+                order['total_amount'] = float(order['total_amount'])
+        
+        return jsonify(orders), 200
+        
+    except Exception as e:
+        print(f"❌ Get all orders error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/orders/<int:order_id>/approve', methods=['PUT'])
+def approve_order(order_id):
+    """Approve order (admin action)"""
+    try:
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Check if order exists and is pending
+        cursor.execute("SELECT status FROM orders WHERE id = %s", (order_id,))
+        order = cursor.fetchone()
+        
+        if not order:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Order not found'}), 404
+        
+        if order['status'] != 'pending':
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Only pending orders can be approved'}), 400
+        
+        # Update order status to processing
+        cursor.execute("UPDATE orders SET status = 'processing' WHERE id = %s", (order_id,))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'message': 'Order approved successfully'}), 200
+        
+    except Exception as e:
+        print(f"❌ Approve order error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/orders/<int:order_id>/decline', methods=['PUT'])
+def decline_order(order_id):
+    """Decline order with reason (admin action)"""
+    try:
+        data = request.get_json()
+        decline_reason = data.get('decline_reason')
+        
+        if not decline_reason or not decline_reason.strip():
+            return jsonify({'error': 'Decline reason is required'}), 400
+        
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Check if order exists and is pending
+        cursor.execute("SELECT status FROM orders WHERE id = %s", (order_id,))
+        order = cursor.fetchone()
+        
+        if not order:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Order not found'}), 404
+        
+        if order['status'] != 'pending':
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Only pending orders can be declined'}), 400
+        
+        # Update order status to declined with reason
+        cursor.execute("""
+            UPDATE orders 
+            SET status = 'declined', decline_reason = %s 
+            WHERE id = %s
+        """, (decline_reason, order_id))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'message': 'Order declined successfully'}), 200
+        
+    except Exception as e:
+        print(f"❌ Decline order error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+# ========== ADMIN PRODUCT MANAGEMENT ENDPOINTS ==========
+@app.route('/api/admin/products', methods=['POST'])
+def create_product():
+    """Create a new product (admin action)"""
+    try:
+        data = request.get_json()
+        
+        required_fields = ['name', 'description', 'price', 'category_id', 'stock_quantity']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'{field} is required'}), 400
+        
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("""
+            INSERT INTO products (name, description, price, category_id, stock_quantity, image_url)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (
+            data['name'],
+            data['description'],
+            data['price'],
+            data['category_id'],
+            data['stock_quantity'],
+            data.get('image_url', '')
+        ))
+        
+        product_id = cursor.lastrowid
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'message': 'Product created successfully',
+            'product_id': product_id
+        }), 201
+        
+    except Exception as e:
+        print(f"❌ Create product error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/products/<int:product_id>', methods=['PUT'])
+def update_product(product_id):
+    """Update a product (admin action)"""
+    try:
+        data = request.get_json()
+        
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Build update query dynamically based on provided fields
+        update_fields = []
+        params = []
+        
+        if 'name' in data:
+            update_fields.append('name = %s')
+            params.append(data['name'])
+        if 'description' in data:
+            update_fields.append('description = %s')
+            params.append(data['description'])
+        if 'price' in data:
+            update_fields.append('price = %s')
+            params.append(data['price'])
+        if 'category_id' in data:
+            update_fields.append('category_id = %s')
+            params.append(data['category_id'])
+        if 'stock_quantity' in data:
+            update_fields.append('stock_quantity = %s')
+            params.append(data['stock_quantity'])
+        if 'image_url' in data:
+            update_fields.append('image_url = %s')
+            params.append(data['image_url'])
+        if 'is_active' in data:
+            update_fields.append('is_active = %s')
+            params.append(data['is_active'])
+        
+        if not update_fields:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'No fields to update'}), 400
+        
+        params.append(product_id)
+        query = f"UPDATE products SET {', '.join(update_fields)} WHERE id = %s"
+        
+        cursor.execute(query, params)
+        
+        if cursor.rowcount == 0:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Product not found'}), 404
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'message': 'Product updated successfully'}), 200
+        
+    except Exception as e:
+        print(f"❌ Update product error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/products/<int:product_id>', methods=['DELETE'])
+def delete_product(product_id):
+    """Delete a product (admin action) - soft delete by setting is_active to false"""
+    try:
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor()
+        
+        # Soft delete - set is_active to false
+        cursor.execute("UPDATE products SET is_active = FALSE WHERE id = %s", (product_id,))
+        
+        if cursor.rowcount == 0:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Product not found'}), 404
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'message': 'Product deleted successfully'}), 200
+        
+    except Exception as e:
+        print(f"❌ Delete product error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+# ========== ADMIN CATEGORY MANAGEMENT ENDPOINTS ==========
+@app.route('/api/admin/categories', methods=['POST'])
+def create_category():
+    """Create a new category (admin action)"""
+    try:
+        data = request.get_json()
+        
+        if 'name' not in data or not data['name'].strip():
+            return jsonify({'error': 'Category name is required'}), 400
+        
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("""
+            INSERT INTO categories (name, description)
+            VALUES (%s, %s)
+        """, (data['name'], data.get('description', '')))
+        
+        category_id = cursor.lastrowid
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'message': 'Category created successfully',
+            'category_id': category_id
+        }), 201
+        
+    except Exception as e:
+        print(f"❌ Create category error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/categories/<int:category_id>', methods=['PUT'])
+def update_category(category_id):
+    """Update a category (admin action)"""
+    try:
+        data = request.get_json()
+        
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor()
+        
+        # Build update query
+        update_fields = []
+        params = []
+        
+        if 'name' in data:
+            update_fields.append('name = %s')
+            params.append(data['name'])
+        if 'description' in data:
+            update_fields.append('description = %s')
+            params.append(data['description'])
+        
+        if not update_fields:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'No fields to update'}), 400
+        
+        params.append(category_id)
+        query = f"UPDATE categories SET {', '.join(update_fields)} WHERE id = %s"
+        
+        cursor.execute(query, params)
+        
+        if cursor.rowcount == 0:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Category not found'}), 404
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'message': 'Category updated successfully'}), 200
+        
+    except Exception as e:
+        print(f"❌ Update category error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/categories/<int:category_id>', methods=['DELETE'])
+def delete_category(category_id):
+    """Delete a category (admin action)"""
+    try:
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor()
+        
+        # Check if category has products
+        cursor.execute("SELECT COUNT(*) as count FROM products WHERE category_id = %s", (category_id,))
+        result = cursor.fetchone()
+        
+        if result[0] > 0:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Cannot delete category with existing products'}), 400
+        
+        cursor.execute("DELETE FROM categories WHERE id = %s", (category_id,))
+        
+        if cursor.rowcount == 0:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Category not found'}), 404
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'message': 'Category deleted successfully'}), 200
+        
+    except Exception as e:
+        print(f"❌ Delete category error: {e}")
+        return jsonify({'error': str(e)}), 500
     
 if __name__ == '__main__':
     print("🚀 Starting E-commerce Backend...")
@@ -948,5 +1382,17 @@ if __name__ == '__main__':
     print("   GET  /api/orders/<order_id>         - Get order details")
     print("   PUT  /api/orders/<id>/status        - Update order status")
     print("   POST /api/orders/<id>/payment-proof - Upload payment proof")
+    print("   PUT  /api/orders/<id>/cancel        - Cancel order (customer)")
+    
+    print("\n=== ADMIN ENDPOINTS ===")
+    print("   GET  /api/admin/orders              - Get all orders")
+    print("   PUT  /api/admin/orders/<id>/approve - Approve order")
+    print("   PUT  /api/admin/orders/<id>/decline - Decline order with reason")
+    print("   POST /api/admin/products            - Create product")
+    print("   PUT  /api/admin/products/<id>       - Update product")
+    print("   DELETE /api/admin/products/<id>     - Delete product")
+    print("   POST /api/admin/categories          - Create category")
+    print("   PUT  /api/admin/categories/<id>     - Update category")
+    print("   DELETE /api/admin/categories/<id>   - Delete category")
     
     app.run(debug=True, port=5000)
