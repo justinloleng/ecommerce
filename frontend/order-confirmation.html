@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Confirmation - E-Shop</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .confirmation-container {
+        padding: 20px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .success-header {
+        text-align: center;
+        padding: 40px 20px;
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        color: white;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(72, 187, 120, 0.3);
+      }
+
+      .success-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        animation: scaleIn 0.5s ease-out;
+      }
+
+      @keyframes scaleIn {
+        0% {
+          transform: scale(0);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .success-header h1 {
+        margin: 0 0 10px 0;
+        font-size: 2rem;
+      }
+
+      .success-header p {
+        margin: 0;
+        font-size: 1.1rem;
+        opacity: 0.95;
+      }
+
+      .order-details-card {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #eaeaea;
+        margin-bottom: 20px;
+      }
+
+      .order-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d3748;
+      }
+
+      .order-status {
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 1rem;
+      }
+
+      .status-pending {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      .status-processing {
+        background: #cfe2ff;
+        color: #084298;
+      }
+
+      .section-title {
+        font-size: 1.3rem;
+        color: #2d3748;
+        margin: 25px 0 15px 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .order-items-list {
+        margin-bottom: 20px;
+      }
+
+      .order-item {
+        display: flex;
+        gap: 20px;
+        padding: 15px;
+        background: #f7fafc;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        align-items: center;
+      }
+
+      .item-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 8px;
+        object-fit: cover;
+        flex-shrink: 0;
+      }
+
+      .item-details {
+        flex: 1;
+      }
+
+      .item-name {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+      }
+
+      .item-price {
+        color: #667eea;
+        font-weight: 600;
+        font-size: 1rem;
+      }
+
+      .item-quantity {
+        color: #718096;
+        font-size: 0.9rem;
+      }
+
+      .shipping-info {
+        background: #f7fafc;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+
+      .shipping-info p {
+        margin: 5px 0;
+        color: #4a5568;
+      }
+
+      .shipping-info strong {
+        color: #2d3748;
+      }
+
+      .order-summary {
+        background: #f7fafc;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+      }
+
+      .summary-row.total {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-top: 10px;
+        padding-top: 15px;
+        border-top: 2px solid #cbd5e0;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+      }
+
+      .btn-secondary {
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+      }
+
+      .btn-secondary:hover {
+        background: #667eea;
+        color: white;
+      }
+
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 400px;
+        color: #718096;
+      }
+
+      .loading-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .error-container {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .error-icon {
+        font-size: 4rem;
+        color: #fc8181;
+        margin-bottom: 20px;
+      }
+
+      .error-container h2 {
+        color: #2d3748;
+        margin-bottom: 10px;
+      }
+
+      .error-container p {
+        color: #718096;
+        margin-bottom: 30px;
+      }
+
+      @media (max-width: 768px) {
+        .order-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 15px;
+        }
+
+        .order-item {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .action-buttons {
+          flex-direction: column;
+        }
+
+        .btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="navbar">
+        <div class="logo">
+          <i class="fas fa-shopping-bag"></i>
+          <span>E-Shop</span>
+        </div>
+        <div class="nav-links">
+          <a href="dashboard.html"> <i class="fas fa-home"></i> Dashboard </a>
+          <a href="products.html"> <i class="fas fa-box"></i> Products </a>
+          <a href="cart.html">
+            <i class="fas fa-shopping-cart"></i> Cart
+            <span class="cart-count">0</span>
+          </a>
+          <a href="orders.html" class="active">
+            <i class="fas fa-receipt"></i> Orders
+          </a>
+          <a href="#" id="adminDashboardLink" style="display: none">
+            <i class="fas fa-user-shield"></i> Admin Dashboard
+          </a>
+          <a href="#" id="logoutBtn" style="color: #fc8181">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+        </div>
+      </nav>
+
+      <div class="confirmation-container">
+        <div id="loadingState" class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>Loading order details...</p>
+        </div>
+
+        <div id="errorState" class="error-container" style="display: none">
+          <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <h2>Order Not Found</h2>
+          <p id="errorMessage">
+            We couldn't find the order you're looking for. Please check the
+            order ID and try again.
+          </p>
+          <div class="action-buttons">
+            <a href="orders.html" class="btn btn-primary">
+              <i class="fas fa-receipt"></i>
+              View My Orders
+            </a>
+            <a href="products.html" class="btn btn-secondary">
+              <i class="fas fa-shopping-bag"></i>
+              Continue Shopping
+            </a>
+          </div>
+        </div>
+
+        <div id="successState" style="display: none">
+          <div class="success-header">
+            <div class="success-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <h1>Order Placed Successfully!</h1>
+            <p>Thank you for your order. We'll send you a confirmation email shortly.</p>
+          </div>
+
+          <div class="order-details-card">
+            <div class="order-header">
+              <div>
+                <div class="order-number" id="orderNumber">
+                  Order #<span id="orderNumberValue"></span>
+                </div>
+                <p style="color: #718096; margin: 5px 0 0 0">
+                  <i class="fas fa-calendar"></i>
+                  <span id="orderDate"></span>
+                </p>
+              </div>
+              <span class="order-status" id="orderStatus"></span>
+            </div>
+
+            <h3 class="section-title">
+              <i class="fas fa-shopping-basket"></i>
+              Order Items
+            </h3>
+            <div class="order-items-list" id="orderItemsList">
+              <!-- Items will be loaded here -->
+            </div>
+
+            <h3 class="section-title">
+              <i class="fas fa-truck"></i>
+              Shipping Information
+            </h3>
+            <div class="shipping-info">
+              <p><strong>Delivery Address:</strong></p>
+              <p id="shippingAddress"></p>
+              <p style="margin-top: 15px">
+                <strong>Payment Method:</strong>
+                <span id="paymentMethod"></span>
+              </p>
+            </div>
+
+            <div class="order-summary">
+              <div class="summary-row">
+                <span>Subtotal</span>
+                <span id="orderSubtotal">$0.00</span>
+              </div>
+              <div class="summary-row">
+                <span>Shipping</span>
+                <span>$5.00</span>
+              </div>
+              <div class="summary-row total">
+                <span>Total</span>
+                <span id="orderTotal">$0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <a href="orders.html" class="btn btn-primary">
+              <i class="fas fa-receipt"></i>
+              View All Orders
+            </a>
+            <a href="products.html" class="btn btn-secondary">
+              <i class="fas fa-shopping-bag"></i>
+              Continue Shopping
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" id="loadingModal">
+        <div class="modal-content">
+          <div class="loader"></div>
+          <p>Processing...</p>
+        </div>
+      </div>
+
+      <div class="toast" id="messageToast"></div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+      // Order Confirmation functionality
+      document.addEventListener("DOMContentLoaded", function () {
+        // Check authentication
+        checkAuthStatus();
+
+        // Setup navigation
+        setupNavigation();
+
+        // Load order details
+        loadOrderDetails();
+      });
+
+      function setupNavigation() {
+        // Show admin link if user is admin
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (user && user.is_admin === 1) {
+          const adminLink = document.getElementById("adminDashboardLink");
+          if (adminLink) {
+            adminLink.style.display = "block";
+            adminLink.href = "admin.html";
+          }
+        }
+
+        // Logout
+        document
+          .getElementById("logoutBtn")
+          .addEventListener("click", function (e) {
+            e.preventDefault();
+            if (confirm("Are you sure you want to logout?")) {
+              logout();
+            }
+          });
+
+        // Update cart count
+        updateCartCount();
+      }
+
+      async function loadOrderDetails() {
+        try {
+          // Get order ID from URL
+          const urlParams = new URLSearchParams(window.location.search);
+          const orderId = urlParams.get("order_id");
+
+          if (!orderId) {
+            showError("No order ID provided");
+            return;
+          }
+
+          // Fetch order details
+          const response = await fetch(
+            `${API_BASE_URL}/orders/${orderId}`,
+            {
+              credentials: "include",
+            }
+          );
+
+          if (!response.ok) {
+            if (response.status === 404) {
+              showError("Order not found");
+            } else {
+              showError("Failed to load order details");
+            }
+            return;
+          }
+
+          const order = await response.json();
+
+          // Display order details
+          displayOrderDetails(order);
+        } catch (error) {
+          console.error("Error loading order details:", error);
+          showError("Network error. Please try again later.");
+        }
+      }
+
+      function displayOrderDetails(order) {
+        // Hide loading, show success
+        document.getElementById("loadingState").style.display = "none";
+        document.getElementById("successState").style.display = "block";
+
+        // Order number and date
+        document.getElementById("orderNumberValue").textContent =
+          order.order_number || order.id;
+        document.getElementById("orderDate").textContent = new Date(
+          order.created_at
+        ).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        // Order status
+        const statusElement = document.getElementById("orderStatus");
+        statusElement.textContent =
+          order.status.charAt(0).toUpperCase() + order.status.slice(1);
+        statusElement.className = `order-status status-${order.status}`;
+
+        // Order items
+        const itemsList = document.getElementById("orderItemsList");
+        itemsList.innerHTML = order.items
+          .map(
+            (item) => `
+          <div class="order-item">
+            <img src="${
+              item.image_url ||
+              "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400"
+            }" 
+                 alt="${item.name}" 
+                 class="item-image"
+                 onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'">
+            <div class="item-details">
+              <div class="item-name">${item.name}</div>
+              <div class="item-quantity">Quantity: ${item.quantity}</div>
+              <div class="item-price">$${(
+                item.price_at_time * item.quantity
+              ).toFixed(2)}</div>
+            </div>
+          </div>
+        `
+          )
+          .join("");
+
+        // Shipping address
+        document.getElementById("shippingAddress").textContent =
+          order.shipping_address;
+
+        // Payment method
+        const paymentMethod = order.payment_method
+          .replace("_", " ")
+          .split(" ")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+        document.getElementById("paymentMethod").textContent = paymentMethod;
+
+        // Order totals
+        const subtotal = order.total_amount - 5.0; // Subtract shipping
+        document.getElementById("orderSubtotal").textContent = `$${subtotal.toFixed(
+          2
+        )}`;
+        document.getElementById("orderTotal").textContent = `$${order.total_amount.toFixed(
+          2
+        )}`;
+      }
+
+      function showError(message) {
+        document.getElementById("loadingState").style.display = "none";
+        document.getElementById("errorState").style.display = "block";
+        document.getElementById("errorMessage").textContent = message;
+      }
+
+      function updateCartCount() {
+        const cartCountElement = document.querySelector(".cart-count");
+        if (cartCountElement) {
+          const user = JSON.parse(localStorage.getItem("user"));
+          if (user) {
+            fetch(`${API_BASE_URL}/cart?user_id=${user.id}`)
+              .then((r) => r.json())
+              .then((data) => {
+                cartCountElement.textContent = data.item_count || 0;
+              })
+              .catch(() => {
+                cartCountElement.textContent = 0;
+              })
+              .finally(() => {
+                cartCountElement.style.display =
+                  parseInt(cartCountElement.textContent) > 0
+                    ? "inline-block"
+                    : "none";
+              });
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
