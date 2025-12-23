@@ -424,21 +424,13 @@
             Total: $${order.total.toFixed(2)}
           </div>
 
-          <div class="order-actions">
-            <button class="btn-view-details" onclick="viewOrderDetails('${order.id}')">
-              <i class="fas fa-eye"></i> View Details
-            </button>
-            ${order.status === 'shipped' || order.status === 'processing' ? `
-              <button class="btn-track" onclick="trackOrder('${order.id}')">
-                <i class="fas fa-truck"></i> Track Order
-              </button>
-            ` : ''}
-            ${order.status === 'pending' ? `
+          ${order.status === 'pending' ? `
+            <div class="order-actions">
               <button class="btn-cancel" onclick="cancelOrder('${order.id}')">
                 <i class="fas fa-times"></i> Cancel Order
               </button>
-            ` : ''}
-          </div>
+            </div>
+          ` : ''}
         </div>
       `).join('');
     }
@@ -458,16 +450,6 @@
         : orders.filter(order => order.status === status);
       
       displayOrders(filteredOrders);
-    }
-
-    function viewOrderDetails(orderId) {
-      alert(`Viewing details for ${orderId}`);
-      // In a real application, this would navigate to a detailed order page
-    }
-
-    function trackOrder(orderId) {
-      alert(`Tracking order ${orderId}`);
-      // In a real application, this would show tracking information
     }
 
     function cancelOrder(orderId) {
