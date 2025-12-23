@@ -1,346 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Orders - E-Shop</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        padding: 20px;
-      }
-
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-
-      .header {
-        background: white;
-        padding: 20px 30px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        margin-bottom: 30px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .header h1 {
-        color: #667eea;
-        font-size: 28px;
-      }
-
-      .back-btn {
-        padding: 10px 20px;
-        background: #667eea;
-        color: white;
-        text-decoration: none;
-        border-radius: 8px;
-        font-weight: 600;
-        
-      }
-
-      .back-btn:hover {
-        background: #5568d3;
-      }
-
-      .orders-container {
-        background: white;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-      }
-
-      .filter-section {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 25px;
-        flex-wrap: wrap;
-      }
-
-      .filter-btn {
-        padding: 10px 20px;
-        border: 2px solid #667eea;
-        background: white;
-        color: #667eea;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.3s ease;
-      }
-
-      .filter-btn.active,
-      .filter-btn:hover {
-        background: #667eea;
-        color: white;
-      }
-
-      .order-card {
-        border: 2px solid #e0e0e0;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 20px;
-        transition: all 0.3s ease;
-      }
-
-      .order-card:hover {
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        transform: translateY(-2px);
-      }
-
-      .order-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #f0f0f0;
-      }
-
-      .order-id {
-        font-weight: 700;
-        color: #333;
-        font-size: 18px;
-      }
-
-      .order-date {
-        color: #666;
-        font-size: 14px;
-      }
-
-      .order-status {
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 14px;
-      }
-
-      .status-pending {
-        background: #fff3cd;
-        color: #856404;
-      }
-
-      .status-processing {
-        background: #cfe2ff;
-        color: #084298;
-      }
-
-      .status-shipped {
-        background: #d1ecf1;
-        color: #0c5460;
-      }
-
-      .status-in_transit {
-        background: #bee5eb;
-        color: #0c5460;
-      }
-
-      .status-delivered {
-        background: #d4edda;
-        color: #155724;
-      }
-
-      .status-cancelled {
-        background: #f8d7da;
-        color: #721c24;
-      }
-
-      .status-declined {
-        background: #ffcccc;
-        color: #721c24;
-      }
-
-      .order-items {
-        margin: 15px 0;
-      }
-
-      .order-item {
-        display: flex;
-        gap: 15px;
-        padding: 10px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        margin-bottom: 10px;
-      }
-
-      .item-image {
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-        border-radius: 8px;
-      }
-
-      .item-details {
-        flex: 1;
-      }
-
-      .item-name {
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 5px;
-      }
-
-      .item-price {
-        color: #667eea;
-        font-weight: 700;
-        font-size: 18px;
-      }
-
-      .item-quantity {
-        color: #666;
-        font-size: 14px;
-      }
-
-      .order-total {
-        text-align: right;
-        font-size: 20px;
-        font-weight: 700;
-        color: #333;
-        margin: 15px 0;
-      }
-
-      .order-actions {
-        display: flex;
-        gap: 10px;
-        justify-content: flex-end;
-      }
-
-      .btn-cancel {
-        padding: 10px 20px;
-        background: #fc8181;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: background 0.3s ease;
-      }
-
-      .btn-cancel:hover {
-        background: #f56565;
-      }
-
-      .btn-view-details,
-      .btn-track {
-        padding: 10px 20px;
-        background: #667eea;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: background 0.3s ease;
-      }
-
-      .btn-view-details:hover,
-      .btn-track:hover {
-        background: #5568d3;
-      }
-    
-  </style>
-</head>
-<body>
-  <nav class="navbar">
-    <div class="logo">
-      <i class="fas fa-shopping-bag"></i>
-      <span>E-Shop</span>
-    </div>
-    <div class="nav-links">
-      <a href="dashboard.html"> <i class="fas fa-home"></i> Dashboard </a>
-      <a href="products.html"> <i class="fas fa-box"></i> Products </a>
-      <a href="cart.html">
-        <i class="fas fa-shopping-cart"></i> Cart
-        <span class="cart-count">0</span>
-      </a>
-      <a href="orders.html" class="active">
-        <i class="fas fa-receipt"></i> Orders
-      </a>
-      <a href="#" id="adminDashboardLink" style="display: none">
-        <i class="fas fa-user-shield"></i> Admin Dashboard
-      </a>
-      <a href="#" id="logoutBtn" style="color: #fc8181">
-        <i class="fas fa-sign-out-alt"></i> Logout
-      </a>
-    </div>
-  </nav>
-
-  <div class="container">
-    <div class="header">
-      <h1><i class="fas fa-shopping-bag"></i> My Orders</h1>
-      <a href="products.html" class="back-btn">
-        <i class="fas fa-arrow-left"></i> Back to Shop
-      </a>
-    </div>
-
-      .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        color: #666;
-      }
-
-      .empty-state i {
-        font-size: 80px;
-        color: #ddd;
-        margin-bottom: 20px;
-      }
-
-      .empty-state h3 {
-        font-size: 24px;
-        margin-bottom: 10px;
-        color: #333;
-      }
-
-      @media (max-width: 768px) {
-        .order-header {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 10px;
-        }
-
-        .order-actions {
-          flex-direction: column;
-          width: 100%;
-        }
-
-        .btn-view-details,
-        .btn-track {
-          width: 100%;
-          justify-content: center;
-        }
-
-        .filter-section {
-          justify-content: center;
-        }
-      }
-    </style>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-Shop - My Orders</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/orders.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
   </head>
   <body>
     <div class="container">
-      <div class="header">
-        <h1><i class="fas fa-shopping-bag"></i> My Orders</h1>
-        <a href="index.html" class="back-btn">
-          <i class="fas fa-arrow-left"></i> Back to Shop
-        </a>
-      </div>
+      <nav class="navbar">
+        <div class="logo">
+          <i class="fas fa-shopping-bag"></i>
+          <span>E-Shop</span>
+        </div>
+        <div class="nav-links">
+          <a href="dashboard.html"> <i class="fas fa-home"></i> Dashboard </a>
+          <a href="products.html"> <i class="fas fa-box"></i> Products </a>
+          <a href="cart.html">
+            <i class="fas fa-shopping-cart"></i> Cart
+            <span class="cart-count">0</span>
+          </a>
+          <a href="orders.html" class="active">
+            <i class="fas fa-receipt"></i> Orders
+          </a>
+          <a href="#" id="adminDashboardLink" style="display: none">
+            <i class="fas fa-user-shield"></i> Admin Dashboard
+          </a>
+          <a href="#" id="logoutBtn" style="color: #fc8181">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </a>
+        </div>
+      </nav>
 
       <div class="orders-container">
+        <div class="orders-header">
+          <h1>
+            <i class="fas fa-shopping-bag"></i> My Orders
+          </h1>
+          <a href="products.html" class="back-to-shop">
+            <i class="fas fa-arrow-left"></i>
+            Back to Shop
+          </a>
+        </div>
+
         <div class="filter-section">
           <button class="filter-btn active" onclick="filterOrders('all')">
             All Orders
@@ -372,18 +79,18 @@
           <!-- Orders will be loaded here -->
         </div>
       </div>
+
+      <div class="modal" id="loadingModal">
+        <div class="modal-content">
+          <div class="loader"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+
+      <div class="toast" id="messageToast"></div>
     </div>
 
-  <div class="modal" id="loadingModal">
-    <div class="modal-content">
-      <div class="loader"></div>
-      <p>Loading...</p>
-    </div>
-  </div>
-
-  <div class="toast" id="messageToast"></div>
-
-  <script src="js/auth.js"></script>
-  <script src="js/orders.js"></script>
-</body>
+    <script src="js/auth.js"></script>
+    <script src="js/orders.js"></script>
+  </body>
 </html>
