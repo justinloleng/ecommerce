@@ -194,6 +194,7 @@ async function handleRegister(event) {
   // Remove confirm_password from data
   delete data.confirm_password;
 
+  // Send registration data
   try {
     showLoading();
 

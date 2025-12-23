@@ -98,7 +98,6 @@
         font-size: 0.9rem;
       }
 
-      /* Modal and Toast styles */
       .modal {
         display: none;
         position: fixed;
@@ -197,9 +196,7 @@
         </div>
       </nav>
 
-      <div class="dashboard" id="dashboardContent">
-        <!-- Dashboard content will be loaded here -->
-      </div>
+      <div class="dashboard" id="dashboardContent"></div>
 
       <div class="modal" id="loadingModal">
         <div class="modal-content">
@@ -212,17 +209,13 @@
     </div>
 
     <script>
-      // Configuration
       const API_BASE_URL = "http://127.0.0.1:5000/api";
 
       document.addEventListener("DOMContentLoaded", function () {
-        // Check authentication
         checkAuthStatus();
 
-        // Load user info
         loadUserInfo();
 
-        // Setup navigation
         setupNavigation();
       });
 
@@ -373,7 +366,7 @@
         const cart = JSON.parse(localStorage.getItem("cart") || "[]");
         const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-        // Update cart count in navigation if element exists
+        // update ug cart count
         const cartCountElements = document.querySelectorAll(".cart-count");
         cartCountElements.forEach((element) => {
           if (element) {

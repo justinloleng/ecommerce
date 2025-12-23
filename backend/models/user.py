@@ -18,7 +18,6 @@ class User(UserMixin):
         self.last_name = last_name
         self.address = address
         self.phone = phone
-        # Convert 1/0 to True/False
         self.is_active = bool(is_active) if is_active is not None else True
         self.is_admin = bool(is_admin) if is_admin is not None else False
         self.created_at = created_at
@@ -55,7 +54,7 @@ class User(UserMixin):
     def create(username, email, password, first_name, last_name, address=None, phone=None):
         """Create a new user"""
         try:
-            # Hash the password
+            
             password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
             
             query = """
@@ -68,7 +67,7 @@ class User(UserMixin):
             user_id = Database.execute_query(query, params, lastrowid=True)
             
             if user_id:
-                # Get the newly created user
+                #fetch mo ung new user 
                 return User.get_by_id(user_id)
             return None
             
