@@ -190,6 +190,9 @@
           <a href="orders.html" id="ordersLink">
             <i class="fas fa-receipt"></i> Orders
           </a>
+          <a href="#" id="adminDashboardLink" style="display: none">
+            <i class="fas fa-user-shield"></i> Admin Dashboard
+          </a>
           <a href="#" id="logoutBtn" style="color: #fc8181">
             <i class="fas fa-sign-out-alt"></i> Logout
           </a>
@@ -220,6 +223,16 @@
       });
 
       function setupNavigation() {
+        // Show admin link if user is admin
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user && user.is_admin === 1) {
+          const adminLink = document.getElementById('adminDashboardLink');
+          if (adminLink) {
+            adminLink.style.display = 'block';
+            adminLink.href = 'admin.html';
+          }
+        }
+        
         // Logout button
         document
           .getElementById("logoutBtn")

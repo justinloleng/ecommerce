@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Orders - ShopEase</title>
+  <title>My Orders - E-Shop</title>
+  <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * {
@@ -296,10 +297,34 @@
   </style>
 </head>
 <body>
+  <nav class="navbar">
+    <div class="logo">
+      <i class="fas fa-shopping-bag"></i>
+      <span>E-Shop</span>
+    </div>
+    <div class="nav-links">
+      <a href="dashboard.html"> <i class="fas fa-home"></i> Dashboard </a>
+      <a href="products.html"> <i class="fas fa-box"></i> Products </a>
+      <a href="cart.html">
+        <i class="fas fa-shopping-cart"></i> Cart
+        <span class="cart-count">0</span>
+      </a>
+      <a href="orders.html" class="active">
+        <i class="fas fa-receipt"></i> Orders
+      </a>
+      <a href="#" id="adminDashboardLink" style="display: none">
+        <i class="fas fa-user-shield"></i> Admin Dashboard
+      </a>
+      <a href="#" id="logoutBtn" style="color: #fc8181">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </a>
+    </div>
+  </nav>
+
   <div class="container">
     <div class="header">
       <h1><i class="fas fa-shopping-bag"></i> My Orders</h1>
-      <a href="index.html" class="back-btn">
+      <a href="products.html" class="back-btn">
         <i class="fas fa-arrow-left"></i> Back to Shop
       </a>
     </div>
@@ -322,217 +347,16 @@
     </div>
   </div>
 
-  <script>
-    // Sample order data
-    const orders = [
-      {
-        id: 'ORD-2024-001',
-        date: '2024-01-15',
-        status: 'delivered',
-        items: [
-          {
-            name: 'Wireless Headphones',
-            price: 79.99,
-            quantity: 1,
-            image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300'
-          }
-        ],
-        total: 79.99
-      },
-      {
-        id: 'ORD-2024-002',
-        date: '2024-01-18',
-        status: 'shipped',
-        items: [
-          {
-            name: 'Smart Watch',
-            price: 199.99,
-            quantity: 1,
-            image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300'
-          },
-          {
-            name: 'Phone Case',
-            price: 19.99,
-            quantity: 2,
-            image: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=300'
-          }
-        ],
-        total: 239.97
-      },
-      {
-        id: 'ORD-2024-003',
-        date: '2024-01-20',
-        status: 'processing',
-        items: [
-          {
-            name: 'Laptop Backpack',
-            price: 49.99,
-            quantity: 1,
-            image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300'
-          }
-        ],
-        total: 49.99
-      },
-      {
-        id: 'ORD-2024-004',
-        date: '2024-01-22',
-        status: 'pending',
-        items: [
-          {
-            name: 'Bluetooth Speaker',
-            price: 59.99,
-            quantity: 1,
-            image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300'
-          }
-        ],
-        total: 59.99
-      },
-      {
-        id: 'ORD-2024-005',
-        date: '2024-01-23',
-        status: 'in_transit',
-        items: [
-          {
-            name: 'Wireless Mouse',
-            price: 29.99,
-            quantity: 2,
-            image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=300'
-          }
-        ],
-        total: 59.98
-      },
-      {
-        id: 'ORD-2024-006',
-        date: '2024-01-24',
-        status: 'declined',
-        decline_reason: 'Product is currently out of stock. We apologize for the inconvenience.',
-        items: [
-          {
-            name: 'Gaming Keyboard',
-            price: 89.99,
-            quantity: 1,
-            image: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300'
-          }
-        ],
-        total: 89.99
-      }
-    ];
+  <div class="modal" id="loadingModal">
+    <div class="modal-content">
+      <div class="loader"></div>
+      <p>Loading...</p>
+    </div>
+  </div>
 
-    let currentFilter = 'all';
+  <div class="toast" id="messageToast"></div>
 
-    function displayOrders(ordersToDisplay) {
-      const ordersContent = document.getElementById('ordersContent');
-
-      if (ordersToDisplay.length === 0) {
-        ordersContent.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <h3>No orders found</h3>
-            <p>You haven't placed any orders yet or no orders match this filter.</p>
-          </div>
-        `;
-        return;
-      }
-
-      ordersContent.innerHTML = ordersToDisplay.map(order => `
-        <div class="order-card" data-status="${order.status}">
-          <div class="order-header">
-            <div>
-              <div class="order-id">${order.id}</div>
-              <div class="order-date">
-                <i class="fas fa-calendar"></i> ${new Date(order.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-              </div>
-            </div>
-            <span class="order-status status-${order.status}">
-              ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-            </span>
-          </div>
-
-          <div class="order-items">
-            ${order.items.map(item => `
-              <div class="order-item">
-                <img src="${item.image}" alt="${item.name}" class="item-image">
-                <div class="item-details">
-                  <div class="item-name">${item.name}</div>
-                  <div class="item-quantity">Quantity: ${item.quantity}</div>
-                  <div class="item-price">$${item.price.toFixed(2)}</div>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-
-          ${order.status === 'declined' && order.decline_reason ? `
-            <div style="background: #ffebee; border-left: 4px solid #f44336; padding: 15px; margin: 15px 0; border-radius: 8px;">
-              <strong style="color: #c62828;">
-                <i class="fas fa-info-circle"></i> Order Declined
-              </strong>
-              <p style="color: #666; margin: 5px 0 0 0;">
-                Reason: ${order.decline_reason}
-              </p>
-            </div>
-          ` : ''}
-
-          <div class="order-total">
-            Total: $${order.total.toFixed(2)}
-          </div>
-
-          <div class="order-actions">
-            ${order.status === 'pending' ? `
-              <button class="btn-cancel" onclick="cancelOrder('${order.id}')">
-                <i class="fas fa-times"></i> Cancel Order
-              </button>
-            ` : ''}
-            ${['processing', 'shipped', 'delivered'].includes(order.status) ? `
-              <button class="btn-view-details" onclick="viewOrderDetails('${order.id}')">
-                <i class="fas fa-eye"></i> View Detail
-              </button>
-            ` : ''}
-            ${['shipped', 'in_transit'].includes(order.status) ? `
-              <button class="btn-track" onclick="trackOrder('${order.id}')">
-                <i class="fas fa-truck"></i> Track Order
-              </button>
-            ` : ''}
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function filterOrders(status) {
-      currentFilter = status;
-      
-      // Update active button
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      event.target.classList.add('active');
-
-      // Filter orders
-      const filteredOrders = status === 'all' 
-        ? orders 
-        : orders.filter(order => order.status === status);
-      
-      displayOrders(filteredOrders);
-    }
-
-    function cancelOrder(orderId) {
-      if (confirm(`Are you sure you want to cancel order ${orderId}?`)) {
-        alert(`Order ${orderId} has been cancelled`);
-        // In a real application, this would send a cancellation request to the server
-      }
-    }
-
-    function viewOrderDetails(orderId) {
-      alert(`Viewing details for order ${orderId}`);
-      // In a real application, this would navigate to the order detail page or show a modal
-    }
-
-    function trackOrder(orderId) {
-      alert(`Tracking information for order ${orderId}`);
-      // In a real application, this would show tracking information
-    }
-
-    // Initialize - display all orders
-    displayOrders(orders);
-  </script>
+  <script src="js/auth.js"></script>
+  <script src="js/orders.js"></script>
 </body>
 </html>
