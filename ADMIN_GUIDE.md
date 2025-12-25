@@ -85,6 +85,64 @@ Organize products into logical categories.
 - Displays product count per category
 - Delete button disabled for categories with products
 
+### 4. Sales Reports
+Generate comprehensive sales analytics with flexible time periods.
+
+#### Report Features
+- **Period Selection**: Choose reporting granularity
+  - Daily: Day-by-day breakdown
+  - Weekly: Week-by-week aggregation
+  - Monthly: Month-by-month summary
+
+- **Date Filters**: 
+  - Start Date: Filter reports from a specific date
+  - End Date: Filter reports up to a specific date
+  - Custom ranges supported
+
+#### Report Statistics
+- **Total Orders**: Overall order count for the period
+- **Total Revenue**: Sum of all order amounts
+- **Average Order Value**: Mean transaction value
+- **Unique Customers**: Number of distinct customers
+
+#### Sales Data Table
+- Displays period-by-period breakdown
+- Shows orders, revenue, average order, customers, and completed orders
+- Sorted by most recent period first
+
+#### Top Selling Products
+- Lists best-performing products
+- Shows units sold and revenue generated
+- Helps identify popular items for inventory planning
+
+### 5. User Management
+Manage customer accounts with comprehensive administrative tools.
+
+#### User List Display
+- Shows all registered users with key information
+- Displays user ID, name, email, phone
+- Shows order count and total spending
+- Indicates account status (Active/Inactive)
+- Shows admin privileges
+
+#### User Actions
+- **Reset Password**: Admin can reset any user's password
+  - Requires new password (minimum 6 characters)
+  - Must confirm password entry
+  - User can log in with new password immediately
+  - Consider notifying user via email (future enhancement)
+
+- **Deactivate Account**: Temporarily disable user access
+  - Prevents user from logging in
+  - Preserves user data and order history
+  - Can be reversed with activation
+  - Use for suspended or problematic accounts
+
+- **Activate Account**: Re-enable a deactivated account
+  - Restores user login access
+  - All data remains intact
+  - User can resume normal operations
+
 ## API Endpoints
 
 ### Order Management (Admin)
@@ -112,6 +170,23 @@ DELETE /api/admin/categories/:id      - Delete category
 ### Customer Order Actions
 ```
 PUT    /api/orders/:id/cancel         - Cancel pending order (customer)
+```
+
+### Sales Reports (Admin)
+```
+GET    /api/admin/reports/sales       - Get sales reports
+  Query Parameters:
+  - period: daily|weekly|monthly (default: daily)
+  - start_date: YYYY-MM-DD (optional)
+  - end_date: YYYY-MM-DD (optional)
+```
+
+### User Management (Admin)
+```
+GET    /api/admin/users                         - Get all users with stats
+PUT    /api/admin/users/:id/reset-password      - Reset user password (requires new_password)
+PUT    /api/admin/users/:id/deactivate          - Deactivate user account
+PUT    /api/admin/users/:id/activate            - Activate user account
 ```
 
 ## Database Changes
@@ -224,6 +299,43 @@ Reason: [Admin's reason for declining]
 5. Save changes
 6. Stock level updated in real-time
 
+### Generating Sales Reports
+1. Navigate to admin panel
+2. Switch to Reports tab
+3. Select period (Daily, Weekly, or Monthly)
+4. (Optional) Set start and end dates for custom range
+5. Click "Generate Report" button
+6. View:
+   - Overall statistics cards (total orders, revenue, avg order value, customers)
+   - Period-by-period breakdown table
+   - Top selling products list
+
+### Resetting a User's Password
+1. Navigate to admin panel
+2. Switch to Users tab
+3. Find the user in the list
+4. Click the key icon (🔑) button
+5. Enter new password (minimum 6 characters)
+6. Confirm password
+7. Click "Reset Password"
+8. User can now log in with the new password
+
+### Deactivating a User Account
+1. Navigate to Users tab
+2. Find the user with "Active" status
+3. Click the ban icon (🚫) button
+4. Confirm the action
+5. User status changes to "Inactive"
+6. User cannot log in until reactivated
+
+### Activating a User Account
+1. Navigate to Users tab
+2. Find the user with "Inactive" status
+3. Click the check icon (✓) button
+4. Confirm the action
+5. User status changes to "Active"
+6. User can log in normally
+
 ## Troubleshooting
 
 ### "Cannot delete category with existing products"
@@ -246,6 +358,10 @@ Reason: [Admin's reason for declining]
 - [ ] Bulk product import/export
 - [ ] Advanced order filtering and search
 - [ ] Product image upload functionality
-- [ ] Email notifications for order status changes
-- [ ] Sales analytics and reporting
+- [ ] Email notifications for order status changes and password resets
+- [x] Sales analytics and reporting (COMPLETED)
 - [ ] Inventory low-stock alerts
+- [ ] Export sales reports to PDF/DOC format
+- [x] User management (reset password, activate/deactivate) (COMPLETED)
+- [ ] Audit logs for admin actions
+- [ ] Role-based permissions (different admin levels)

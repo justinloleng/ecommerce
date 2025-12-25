@@ -1351,6 +1351,331 @@ def delete_category(category_id):
     except Exception as e:
         print(f"❌ Delete category error: {e}")
         return jsonify({'error': str(e)}), 500
+
+# ========== ADMIN SALES REPORTS ENDPOINTS ==========
+@app.route('/api/admin/reports/sales', methods=['GET'])
+def get_sales_report():
+    """Get sales reports with daily, weekly, or monthly aggregation"""
+    try:
+        period = request.args.get('period', 'daily')  # daily, weekly, monthly
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        
+        if period not in ['daily', 'weekly', 'monthly']:
+            return jsonify({'error': 'Invalid period. Use daily, weekly, or monthly'}), 400
+        
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Build date filter
+        date_filter = ""
+        params = []
+        
+        if start_date:
+            date_filter += " AND DATE(o.created_at) >= %s"
+            params.append(start_date)
+        if end_date:
+            date_filter += " AND DATE(o.created_at) <= %s"
+            params.append(end_date)
+        
+        # Determine date grouping based on period
+        if period == 'daily':
+            date_group = "DATE(o.created_at)"
+            date_format = "%Y-%m-%d"
+        elif period == 'weekly':
+            date_group = "YEARWEEK(o.created_at, 1)"
+            date_format = "Week %v, %Y"
+        else:  # monthly
+            date_group = "DATE_FORMAT(o.created_at, '%Y-%m')"
+            date_format = "%Y-%m"
+        
+        # Get sales data grouped by period
+        query = f"""
+            SELECT 
+                {date_group} as period,
+                DATE_FORMAT(o.created_at, '{date_format}') as period_label,
+                COUNT(DISTINCT o.id) as total_orders,
+                SUM(o.total_amount) as total_revenue,
+                AVG(o.total_amount) as average_order_value,
+                COUNT(DISTINCT o.user_id) as unique_customers,
+                SUM(CASE WHEN o.status = 'delivered' THEN 1 ELSE 0 END) as completed_orders,
+                SUM(CASE WHEN o.status = 'cancelled' THEN 1 ELSE 0 END) as cancelled_orders,
+                SUM(CASE WHEN o.status = 'declined' THEN 1 ELSE 0 END) as declined_orders
+            FROM orders o
+            WHERE o.status IN ('pending', 'processing', 'shipped', 'in_transit', 'delivered', 'cancelled', 'declined')
+            {date_filter}
+            GROUP BY {date_group}
+            ORDER BY period DESC
+            LIMIT 50
+        """
+        
+        cursor.execute(query, params)
+        sales_data = cursor.fetchall()
+        
+        # Get overall statistics
+        stats_query = f"""
+            SELECT 
+                COUNT(DISTINCT o.id) as total_orders,
+                SUM(o.total_amount) as total_revenue,
+                AVG(o.total_amount) as average_order_value,
+                COUNT(DISTINCT o.user_id) as unique_customers,
+                SUM(CASE WHEN o.status = 'delivered' THEN o.total_amount ELSE 0 END) as delivered_revenue,
+                COUNT(CASE WHEN o.status = 'delivered' THEN 1 END) as delivered_orders
+            FROM orders o
+            WHERE 1=1 {date_filter}
+        """
+        
+        cursor.execute(stats_query, params)
+        overall_stats = cursor.fetchone()
+        
+        # Get top selling products
+        top_products_query = f"""
+            SELECT 
+                p.id,
+                p.name,
+                p.image_url,
+                SUM(oi.quantity) as total_quantity_sold,
+                SUM(oi.quantity * oi.price_at_time) as total_revenue
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            JOIN orders o ON oi.order_id = o.id
+            WHERE o.status IN ('delivered', 'shipped', 'in_transit', 'processing')
+            {date_filter}
+            GROUP BY p.id, p.name, p.image_url
+            ORDER BY total_quantity_sold DESC
+            LIMIT 10
+        """
+        
+        cursor.execute(top_products_query, params)
+        top_products = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        # Convert Decimal to float
+        for item in sales_data:
+            if 'total_revenue' in item and item['total_revenue'] is not None:
+                item['total_revenue'] = float(item['total_revenue'])
+            if 'average_order_value' in item and item['average_order_value'] is not None:
+                item['average_order_value'] = float(item['average_order_value'])
+        
+        if overall_stats:
+            if 'total_revenue' in overall_stats and overall_stats['total_revenue'] is not None:
+                overall_stats['total_revenue'] = float(overall_stats['total_revenue'])
+            if 'average_order_value' in overall_stats and overall_stats['average_order_value'] is not None:
+                overall_stats['average_order_value'] = float(overall_stats['average_order_value'])
+            if 'delivered_revenue' in overall_stats and overall_stats['delivered_revenue'] is not None:
+                overall_stats['delivered_revenue'] = float(overall_stats['delivered_revenue'])
+        
+        for product in top_products:
+            if 'total_revenue' in product and product['total_revenue'] is not None:
+                product['total_revenue'] = float(product['total_revenue'])
+        
+        return jsonify({
+            'period': period,
+            'start_date': start_date,
+            'end_date': end_date,
+            'sales_data': sales_data,
+            'overall_stats': overall_stats,
+            'top_products': top_products
+        }), 200
+        
+    except Exception as e:
+        print(f"❌ Get sales report error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+# ========== ADMIN USER MANAGEMENT ENDPOINTS ==========
+@app.route('/api/admin/users', methods=['GET'])
+def get_all_users():
+    """Get all users (admin view)"""
+    try:
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Get all users with order statistics
+        cursor.execute("""
+            SELECT 
+                u.id, u.username, u.email, u.first_name, u.last_name, 
+                u.phone, u.address, u.is_active, u.is_admin, u.created_at,
+                COUNT(DISTINCT o.id) as total_orders,
+                SUM(CASE WHEN o.status = 'delivered' THEN o.total_amount ELSE 0 END) as total_spent
+            FROM users u
+            LEFT JOIN orders o ON u.id = o.user_id
+            GROUP BY u.id
+            ORDER BY u.created_at DESC
+        """)
+        
+        users = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        # Convert Decimal to float
+        for user in users:
+            if 'total_spent' in user and user['total_spent'] is not None:
+                user['total_spent'] = float(user['total_spent'])
+        
+        return jsonify(users), 200
+        
+    except Exception as e:
+        print(f"❌ Get all users error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/users/<int:user_id>/reset-password', methods=['PUT'])
+def reset_user_password(user_id):
+    """Reset a user's password (admin action)"""
+    try:
+        data = request.get_json()
+        new_password = data.get('new_password')
+        
+        if not new_password or len(new_password) < 6:
+            return jsonify({'error': 'Password must be at least 6 characters'}), 400
+        
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Check if user exists
+        cursor.execute("SELECT id, username, email FROM users WHERE id = %s", (user_id,))
+        user = cursor.fetchone()
+        
+        if not user:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'User not found'}), 404
+        
+        # Hash the new password
+        hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+        
+        # Update password
+        cursor.execute("""
+            UPDATE users 
+            SET password_hash = %s, updated_at = NOW()
+            WHERE id = %s
+        """, (hashed.decode('utf-8'), user_id))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'message': 'Password reset successfully',
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'email': user['email']
+            }
+        }), 200
+        
+    except Exception as e:
+        print(f"❌ Reset password error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/users/<int:user_id>/deactivate', methods=['PUT'])
+def deactivate_user(user_id):
+    """Deactivate a user account (admin action)"""
+    try:
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Check if user exists
+        cursor.execute("SELECT id, username, email, is_active FROM users WHERE id = %s", (user_id,))
+        user = cursor.fetchone()
+        
+        if not user:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'User not found'}), 404
+        
+        if not user['is_active']:
+            cursor.close()
+            conn.close()
+            return jsonify({'message': 'User is already deactivated'}), 200
+        
+        # Deactivate user
+        cursor.execute("""
+            UPDATE users 
+            SET is_active = 0, updated_at = NOW()
+            WHERE id = %s
+        """, (user_id,))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'message': 'User deactivated successfully',
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'email': user['email'],
+                'is_active': False
+            }
+        }), 200
+        
+    except Exception as e:
+        print(f"❌ Deactivate user error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/users/<int:user_id>/activate', methods=['PUT'])
+def activate_user(user_id):
+    """Activate a user account (admin action)"""
+    try:
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Check if user exists
+        cursor.execute("SELECT id, username, email, is_active FROM users WHERE id = %s", (user_id,))
+        user = cursor.fetchone()
+        
+        if not user:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'User not found'}), 404
+        
+        if user['is_active']:
+            cursor.close()
+            conn.close()
+            return jsonify({'message': 'User is already active'}), 200
+        
+        # Activate user
+        cursor.execute("""
+            UPDATE users 
+            SET is_active = 1, updated_at = NOW()
+            WHERE id = %s
+        """, (user_id,))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'message': 'User activated successfully',
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'email': user['email'],
+                'is_active': True
+            }
+        }), 200
+        
+    except Exception as e:
+        print(f"❌ Activate user error: {e}")
+        return jsonify({'error': str(e)}), 500
     
 if __name__ == '__main__':
     print("🚀 Starting E-commerce Backend...")
@@ -1396,5 +1721,14 @@ if __name__ == '__main__':
     print("   POST /api/admin/categories          - Create category")
     print("   PUT  /api/admin/categories/<id>     - Update category")
     print("   DELETE /api/admin/categories/<id>   - Delete category")
+    
+    print("\n=== ADMIN REPORTS ENDPOINTS ===")
+    print("   GET  /api/admin/reports/sales       - Get sales reports (daily/weekly/monthly)")
+    
+    print("\n=== ADMIN USER MANAGEMENT ENDPOINTS ===")
+    print("   GET  /api/admin/users               - Get all users")
+    print("   PUT  /api/admin/users/<id>/reset-password - Reset user password")
+    print("   PUT  /api/admin/users/<id>/deactivate - Deactivate user account")
+    print("   PUT  /api/admin/users/<id>/activate - Activate user account")
     
     app.run(debug=True, port=5000)
