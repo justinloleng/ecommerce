@@ -1517,7 +1517,7 @@
             </span>
           </td>
           <td>
-            <button class="btn btn-primary btn-sm" onclick="showPasswordResetModal(${user.id}, '${user.username}', '${user.email}')" title="Reset Password">
+            <button class="btn btn-primary btn-sm" onclick="showPasswordResetModal(${user.id}, '${user.first_name} ${user.last_name}', '${user.email}')" title="Reset Password">
               <i class="fas fa-key"></i>
             </button>
             ${user.is_active ? `

@@ -1443,7 +1443,7 @@ def get_sales_report():
             JOIN products p ON oi.product_id = p.id
             JOIN orders o ON oi.order_id = o.id
             WHERE o.status IN ('delivered', 'shipped', 'in_transit', 'processing')
-            {date_filter.replace('o.created_at', 'o.created_at')}
+            {date_filter}
             GROUP BY p.id, p.name, p.image_url
             ORDER BY total_quantity_sold DESC
             LIMIT 10
