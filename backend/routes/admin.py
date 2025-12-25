@@ -11,6 +11,10 @@ from werkzeug.utils import secure_filename
 
 admin_bp = Blueprint('admin', __name__)
 
+# Configuration
+BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+UPLOAD_DIR = os.path.join(BACKEND_DIR, 'static', 'uploads', 'products')
+
 def get_db():
     """Get database connection"""
     try:
@@ -24,6 +28,25 @@ def get_db():
     except Error as e:
         print(f"❌ Database error: {e}")
         return None
+
+def get_date_grouping(period):
+    """
+    Get SQL date grouping and formatting based on period.
+    Returns a tuple of (date_group, date_format).
+    
+    This function uses a whitelist approach to prevent SQL injection.
+    Only pre-defined, hardcoded values are returned.
+    """
+    # Whitelist of allowed period values with their corresponding SQL expressions
+    period_config = {
+        'daily': ("DATE(o.created_at)", "%Y-%m-%d"),
+        'weekly': ("YEARWEEK(o.created_at, 1)", "Week %v, %Y"),
+        'monthly': ("DATE_FORMAT(o.created_at, '%Y-%m')", "%Y-%m")
+    }
+    
+    # Return the hardcoded values for the given period
+    # If period is not in whitelist, default to daily
+    return period_config.get(period, period_config['daily'])
 
 # ========== ADMIN ORDER ENDPOINTS ==========
 @admin_bp.route('/orders', methods=['GET'])
@@ -455,17 +478,11 @@ def get_sales_report():
             date_filter += " AND DATE(o.created_at) <= %s"
             params.append(end_date)
         
-        # Determine date grouping based on period
-        if period == 'daily':
-            date_group = "DATE(o.created_at)"
-            date_format = "%Y-%m-%d"
-        elif period == 'weekly':
-            date_group = "YEARWEEK(o.created_at, 1)"
-            date_format = "Week %v, %Y"
-        else:  # monthly
-            date_group = "DATE_FORMAT(o.created_at, '%Y-%m')"
-            date_format = "%Y-%m"
+        # Get date grouping configuration from helper function (prevents SQL injection)
+        date_group, date_format = get_date_grouping(period)
         
+        # Safe to use f-string here: date_group and date_format come from a validated whitelist
+        # in get_date_grouping() function, which only returns hardcoded SQL expressions.
         # Get sales data grouped by period
         query = f"""
             SELECT 
@@ -595,17 +612,11 @@ def generate_sales_report():
             date_filter += " AND DATE(o.created_at) <= %s"
             params.append(end_date)
         
-        # Determine date grouping based on period
-        if period == 'daily':
-            date_group = "DATE(o.created_at)"
-            date_format = "%Y-%m-%d"
-        elif period == 'weekly':
-            date_group = "YEARWEEK(o.created_at, 1)"
-            date_format = "Week %v, %Y"
-        else:  # monthly
-            date_group = "DATE_FORMAT(o.created_at, '%Y-%m')"
-            date_format = "%Y-%m"
+        # Get date grouping configuration from helper function (prevents SQL injection)
+        date_group, date_format = get_date_grouping(period)
         
+        # Safe to use f-string here: date_group and date_format come from a validated whitelist
+        # in get_date_grouping() function, which only returns hardcoded SQL expressions.
         # Get sales data
         query = f"""
             SELECT 
@@ -1145,15 +1156,12 @@ def upload_product_image(product_id):
         if file_ext not in allowed_extensions:
             return jsonify({'error': 'Invalid file type. Allowed: png, jpg, jpeg, gif'}), 400
         
-        # Create upload directory if it doesn't exist
-        # Get the backend directory (parent of routes directory)
-        backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        upload_dir = os.path.join(backend_dir, 'static', 'uploads', 'products')
-        os.makedirs(upload_dir, exist_ok=True)
+        # Create upload directory if it doesn't exist (using constant defined at top of file)
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
         
         # Generate unique filename
         unique_filename = f"{uuid.uuid4().hex}.{file_ext}"
-        file_path = os.path.join(upload_dir, unique_filename)
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
         
         # Save file
         file.save(file_path)
