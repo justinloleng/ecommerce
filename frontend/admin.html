@@ -457,6 +457,12 @@
         <button class="tab-button" onclick="switchTab('categories', event)">
           <i class="fas fa-tags"></i> Categories
         </button>
+        <button class="tab-button" onclick="switchTab('reports', event)">
+          <i class="fas fa-chart-line"></i> Reports
+        </button>
+        <button class="tab-button" onclick="switchTab('users', event)">
+          <i class="fas fa-users"></i> Users
+        </button>
       </div>
 
       <!-- Orders Tab -->
@@ -591,6 +597,125 @@
           </table>
         </div>
       </div>
+
+      <!-- Reports Tab -->
+      <div id="reports-tab" class="tab-content">
+        <div class="section-header">
+          <h2>Sales Reports</h2>
+        </div>
+
+        <!-- Report Filters -->
+        <div style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end;">
+            <div>
+              <label style="display: block; margin-bottom: 5px; font-weight: 600;">Period:</label>
+              <select id="reportPeriod" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 5px; font-weight: 600;">Start Date:</label>
+              <input type="date" id="reportStartDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 5px; font-weight: 600;">End Date:</label>
+              <input type="date" id="reportEndDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+            <div>
+              <button class="btn btn-primary" onclick="loadSalesReport()" style="width: 100%;">
+                <i class="fas fa-sync"></i> Generate Report
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Overall Stats -->
+        <div id="reportStats" class="stats-grid">
+          <!-- Will be populated by JavaScript -->
+        </div>
+
+        <!-- Sales Data Table -->
+        <div class="table-container" style="margin-bottom: 20px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th>Orders</th>
+                <th>Revenue</th>
+                <th>Avg Order</th>
+                <th>Customers</th>
+                <th>Completed</th>
+              </tr>
+            </thead>
+            <tbody id="salesTableBody">
+              <tr>
+                <td colspan="6" class="empty-state">
+                  <i class="fas fa-chart-bar"></i>
+                  <p>Select filters and click "Generate Report" to view sales data</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Top Products -->
+        <div class="section-header">
+          <h2>Top Selling Products</h2>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Units Sold</th>
+                <th>Revenue</th>
+              </tr>
+            </thead>
+            <tbody id="topProductsTableBody">
+              <tr>
+                <td colspan="3" class="empty-state">
+                  <i class="fas fa-box"></i>
+                  <p>Generate a report to see top products</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Users Tab -->
+      <div id="users-tab" class="tab-content">
+        <div class="section-header">
+          <h2>Manage Users</h2>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Orders</th>
+                <th>Total Spent</th>
+                <th>Status</th>
+                <th>Admin</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr>
+                <td colspan="9" class="empty-state">
+                  <i class="fas fa-spinner fa-spin"></i>
+                  <p>Loading users...</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -683,6 +808,34 @@
     </div>
   </div>
 
+  <!-- Password Reset Modal -->
+  <div id="passwordResetModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Reset User Password</h3>
+        <button class="close-btn" onclick="closeModal('passwordResetModal')">&times;</button>
+      </div>
+      <form id="passwordResetForm">
+        <input type="hidden" id="resetUserId">
+        <p style="margin-bottom: 20px; color: #666;">
+          Resetting password for: <strong id="resetUserInfo"></strong>
+        </p>
+        <div class="form-group">
+          <label>New Password *</label>
+          <input type="password" id="newPassword" required minlength="6" placeholder="Minimum 6 characters">
+        </div>
+        <div class="form-group">
+          <label>Confirm Password *</label>
+          <input type="password" id="confirmPassword" required minlength="6" placeholder="Re-enter password">
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('passwordResetModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Reset Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div id="toast" class="toast">
     <i class="fas fa-check-circle"></i>
@@ -734,6 +887,10 @@
         loadProducts();
       } else if (tab === 'categories') {
         loadCategories();
+      } else if (tab === 'reports') {
+        // Reports tab - user needs to click Generate Report button
+      } else if (tab === 'users') {
+        loadUsers();
       }
     }
 
@@ -1185,6 +1342,291 @@
       } catch (error) {
         console.error('Error deleting category:', error);
         showToast(error.message || 'Failed to delete category', 'error');
+      }
+    }
+
+    // ========== SALES REPORTS ==========
+    async function loadSalesReport() {
+      try {
+        const period = document.getElementById('reportPeriod').value;
+        const startDate = document.getElementById('reportStartDate').value;
+        const endDate = document.getElementById('reportEndDate').value;
+
+        let url = `${API_BASE_URL}/admin/reports/sales?period=${period}`;
+        if (startDate) url += `&start_date=${startDate}`;
+        if (endDate) url += `&end_date=${endDate}`;
+
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error('Failed to load sales report');
+        }
+
+        const reportData = await response.json();
+        displaySalesReport(reportData);
+      } catch (error) {
+        console.error('Error loading sales report:', error);
+        showToast('Failed to load sales report', 'error');
+      }
+    }
+
+    function displaySalesReport(reportData) {
+      // Display overall stats
+      const statsHtml = `
+        <div class="stat-card">
+          <div class="stat-icon blue">
+            <i class="fas fa-shopping-cart"></i>
+          </div>
+          <div class="stat-info">
+            <h3>${reportData.overall_stats?.total_orders || 0}</h3>
+            <p>Total Orders</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <i class="fas fa-dollar-sign"></i>
+          </div>
+          <div class="stat-info">
+            <h3>$${(reportData.overall_stats?.total_revenue || 0).toFixed(2)}</h3>
+            <p>Total Revenue</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div class="stat-info">
+            <h3>$${(reportData.overall_stats?.average_order_value || 0).toFixed(2)}</h3>
+            <p>Avg Order Value</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stat-info">
+            <h3>${reportData.overall_stats?.unique_customers || 0}</h3>
+            <p>Unique Customers</p>
+          </div>
+        </div>
+      `;
+      document.getElementById('reportStats').innerHTML = statsHtml;
+
+      // Display sales data
+      const tbody = document.getElementById('salesTableBody');
+      if (!reportData.sales_data || reportData.sales_data.length === 0) {
+        tbody.innerHTML = `
+          <tr><td colspan="6" class="empty-state">
+            <i class="fas fa-chart-bar"></i>
+            <p>No sales data found for the selected period</p>
+          </td></tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = reportData.sales_data.map(item => `
+        <tr>
+          <td>${item.period_label || item.period}</td>
+          <td>${item.total_orders || 0}</td>
+          <td><strong>$${(item.total_revenue || 0).toFixed(2)}</strong></td>
+          <td>$${(item.average_order_value || 0).toFixed(2)}</td>
+          <td>${item.unique_customers || 0}</td>
+          <td>${item.completed_orders || 0}</td>
+        </tr>
+      `).join('');
+
+      // Display top products
+      const topProductsBody = document.getElementById('topProductsTableBody');
+      if (!reportData.top_products || reportData.top_products.length === 0) {
+        topProductsBody.innerHTML = `
+          <tr><td colspan="3" class="empty-state">
+            <i class="fas fa-box"></i>
+            <p>No product data available</p>
+          </td></tr>
+        `;
+        return;
+      }
+
+      topProductsBody.innerHTML = reportData.top_products.map(product => `
+        <tr>
+          <td>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              ${product.image_url ? `<img src="${product.image_url}" alt="${product.name}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px;">` : ''}
+              <span>${product.name}</span>
+            </div>
+          </td>
+          <td>${product.total_quantity_sold || 0}</td>
+          <td><strong>$${(product.total_revenue || 0).toFixed(2)}</strong></td>
+        </tr>
+      `).join('');
+    }
+
+    // ========== USER MANAGEMENT ==========
+    let currentUsers = [];
+
+    async function loadUsers() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/admin/users`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to load users');
+        }
+
+        currentUsers = await response.json();
+        displayUsers(currentUsers);
+      } catch (error) {
+        console.error('Error loading users:', error);
+        document.getElementById('usersTableBody').innerHTML = `
+          <tr><td colspan="9" class="empty-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>Failed to load users</p>
+          </td></tr>
+        `;
+      }
+    }
+
+    function displayUsers(users) {
+      const tbody = document.getElementById('usersTableBody');
+
+      if (!users || users.length === 0) {
+        tbody.innerHTML = `
+          <tr><td colspan="9" class="empty-state">
+            <i class="fas fa-users"></i>
+            <p>No users found</p>
+          </td></tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = users.map(user => `
+        <tr>
+          <td>${user.id}</td>
+          <td>${user.first_name} ${user.last_name}</td>
+          <td>${user.email}</td>
+          <td>${user.phone || 'N/A'}</td>
+          <td>${user.total_orders || 0}</td>
+          <td><strong>$${(user.total_spent || 0).toFixed(2)}</strong></td>
+          <td>
+            <span class="badge ${user.is_active ? 'badge-delivered' : 'badge-cancelled'}">
+              ${user.is_active ? 'Active' : 'Inactive'}
+            </span>
+          </td>
+          <td>
+            <span class="badge ${user.is_admin ? 'badge-processing' : 'badge-pending'}">
+              ${user.is_admin ? 'Yes' : 'No'}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-primary btn-sm" onclick="showPasswordResetModal(${user.id}, '${user.username}', '${user.email}')" title="Reset Password">
+              <i class="fas fa-key"></i>
+            </button>
+            ${user.is_active ? `
+              <button class="btn btn-danger btn-sm" onclick="deactivateUser(${user.id})" title="Deactivate Account">
+                <i class="fas fa-ban"></i>
+              </button>
+            ` : `
+              <button class="btn btn-success btn-sm" onclick="activateUser(${user.id})" title="Activate Account">
+                <i class="fas fa-check"></i>
+              </button>
+            `}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function showPasswordResetModal(userId, username, email) {
+      document.getElementById('resetUserId').value = userId;
+      document.getElementById('resetUserInfo').textContent = `${username} (${email})`;
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+      document.getElementById('passwordResetModal').classList.add('active');
+    }
+
+    document.getElementById('passwordResetForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const userId = document.getElementById('resetUserId').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (newPassword !== confirmPassword) {
+        showToast('Passwords do not match', 'error');
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        showToast('Password must be at least 6 characters', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/reset-password`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ new_password: newPassword })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to reset password');
+        }
+
+        showToast('Password reset successfully', 'success');
+        closeModal('passwordResetModal');
+      } catch (error) {
+        console.error('Error resetting password:', error);
+        showToast(error.message || 'Failed to reset password', 'error');
+      }
+    });
+
+    async function deactivateUser(userId) {
+      if (!confirm('Are you sure you want to deactivate this user account?')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/deactivate`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to deactivate user');
+        }
+
+        showToast('User deactivated successfully', 'success');
+        loadUsers();
+      } catch (error) {
+        console.error('Error deactivating user:', error);
+        showToast(error.message || 'Failed to deactivate user', 'error');
+      }
+    }
+
+    async function activateUser(userId) {
+      if (!confirm('Are you sure you want to activate this user account?')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/activate`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to activate user');
+        }
+
+        showToast('User activated successfully', 'success');
+        loadUsers();
+      } catch (error) {
+        console.error('Error activating user:', error);
+        showToast(error.message || 'Failed to activate user', 'error');
       }
     }
 
