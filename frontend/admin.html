@@ -606,7 +606,7 @@
 
         <!-- Report Filters -->
         <div style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: end;">
             <div>
               <label style="display: block; margin-bottom: 5px; font-weight: 600;">Period:</label>
               <select id="reportPeriod" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
@@ -626,6 +626,16 @@
             <div>
               <button class="btn btn-primary" onclick="loadSalesReport()" style="width: 100%;">
                 <i class="fas fa-sync"></i> Generate Report
+              </button>
+            </div>
+            <div>
+              <button class="btn btn-success" onclick="exportSalesReport('pdf')" style="width: 100%;">
+                <i class="fas fa-file-pdf"></i> Export PDF
+              </button>
+            </div>
+            <div>
+              <button class="btn btn-success" onclick="exportSalesReport('docx')" style="width: 100%;">
+                <i class="fas fa-file-word"></i> Export DOCX
               </button>
             </div>
           </div>
@@ -774,6 +784,12 @@
         <div class="form-group">
           <label>Image URL</label>
           <input type="url" id="productImage">
+          <small style="color: #666; display: block; margin-top: 5px;">Or upload an image file below:</small>
+        </div>
+        <div class="form-group">
+          <label>Upload Image File</label>
+          <input type="file" id="productImageFile" accept="image/png,image/jpeg,image/jpg,image/gif" style="padding: 8px;">
+          <small style="color: #666; display: block; margin-top: 5px;">Allowed: PNG, JPG, JPEG, GIF (max 16MB)</small>
         </div>
         <div style="display: flex; gap: 10px; justify-content: flex-end;">
           <button type="button" class="btn btn-secondary" onclick="closeModal('productModal')">Cancel</button>
@@ -1052,6 +1068,29 @@
     }
 
     // ========== PRODUCTS MANAGEMENT ==========
+    async function uploadProductImage(productId, file) {
+      try {
+        const formData = new FormData();
+        formData.append('image_file', file);
+
+        const response = await fetch(`${API_BASE_URL}/admin/products/${productId}/upload-image`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to upload image');
+        }
+
+        return data.image_url;
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        throw error;
+      }
+    }
+
     async function loadProducts() {
       try {
         const response = await fetch(`${API_BASE_URL}/products?per_page=100`);
@@ -1125,6 +1164,9 @@
         document.getElementById('productForm').reset();
       }
 
+      // Clear the file input
+      document.getElementById('productImageFile').value = '';
+
       loadCategoriesForDropdown();
       document.getElementById('productModal').classList.add('active');
     }
@@ -1150,6 +1192,17 @@
       e.preventDefault();
       
       const productId = document.getElementById('productId').value;
+      
+      // Validate file size if a file is selected (max 16MB)
+      const imageFile = document.getElementById('productImageFile').files[0];
+      if (imageFile) {
+        const maxSize = 16 * 1024 * 1024; // 16MB in bytes
+        if (imageFile.size > maxSize) {
+          showToast('Image file size must be less than 16MB', 'error');
+          return;
+        }
+      }
+      
       const productData = {
         name: document.getElementById('productName').value,
         description: document.getElementById('productDescription').value,
@@ -1176,7 +1229,27 @@
           throw new Error('Failed to save product');
         }
 
-        showToast(productId ? 'Product updated successfully' : 'Product created successfully', 'success');
+        const savedProduct = await response.json();
+        const savedProductId = savedProduct.product?.id || productId;
+
+        let uploadSucceeded = true;
+        // Check if a file was selected for upload
+        if (imageFile && savedProductId) {
+          try {
+            showToast('Uploading image...', 'info');
+            const imageUrl = await uploadProductImage(savedProductId, imageFile);
+            showToast('Image uploaded successfully', 'success');
+          } catch (uploadError) {
+            uploadSucceeded = false;
+            console.error('Error uploading image:', uploadError);
+            showToast('Product saved but image upload failed: ' + uploadError.message, 'error');
+          }
+        }
+
+        // Only show product save success if image upload also succeeded (or no image was uploaded)
+        if (uploadSucceeded) {
+          showToast(productId ? 'Product updated successfully' : 'Product created successfully', 'success');
+        }
         closeModal('productModal');
         loadProducts();
       } catch (error) {
@@ -1346,6 +1419,48 @@
     }
 
     // ========== SALES REPORTS ==========
+    async function exportSalesReport(format) {
+      try {
+        const period = document.getElementById('reportPeriod').value;
+        const startDate = document.getElementById('reportStartDate').value;
+        const endDate = document.getElementById('reportEndDate').value;
+
+        // Show loading toast
+        showToast(`Generating ${format.toUpperCase()} report...`, 'info');
+
+        const response = await fetch(`${API_BASE_URL}/admin/reports/sales/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            format: format,
+            period: period,
+            start_date: startDate,
+            end_date: endDate
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to generate report');
+        }
+
+        // Download the file
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `sales_report_${period}_${Date.now()}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        showToast(`${format.toUpperCase()} report downloaded successfully`, 'success');
+      } catch (error) {
+        console.error('Error exporting report:', error);
+        showToast('Failed to export report', 'error');
+      }
+    }
+
     async function loadSalesReport() {
       try {
         const period = document.getElementById('reportPeriod').value;
@@ -1581,6 +1696,14 @@
     });
 
     async function deactivateUser(userId) {
+      // Find the user in currentUsers array
+      const user = currentUsers.find(u => u.id === userId);
+      
+      if (user && !user.is_active) {
+        showToast('This account is already deactivated', 'info');
+        return;
+      }
+
       if (!confirm('Are you sure you want to deactivate this user account?')) {
         return;
       }
@@ -1597,7 +1720,7 @@
           throw new Error(data.error || 'Failed to deactivate user');
         }
 
-        showToast('User deactivated successfully', 'success');
+        showToast(data.message || 'User deactivated successfully', 'success');
         loadUsers();
       } catch (error) {
         console.error('Error deactivating user:', error);
@@ -1606,6 +1729,14 @@
     }
 
     async function activateUser(userId) {
+      // Find the user in currentUsers array
+      const user = currentUsers.find(u => u.id === userId);
+      
+      if (user && user.is_active) {
+        showToast('This account is already active', 'info');
+        return;
+      }
+
       if (!confirm('Are you sure you want to activate this user account?')) {
         return;
       }
@@ -1622,7 +1753,7 @@
           throw new Error(data.error || 'Failed to activate user');
         }
 
-        showToast('User activated successfully', 'success');
+        showToast(data.message || 'User activated successfully', 'success');
         loadUsers();
       } catch (error) {
         console.error('Error activating user:', error);
