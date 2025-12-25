@@ -6,6 +6,8 @@ import bcrypt
 from io import BytesIO
 from datetime import datetime
 import os
+import uuid
+from werkzeug.utils import secure_filename
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -252,6 +254,9 @@ def update_product(product_id):
             return jsonify({'error': 'No fields to update'}), 400
         
         params.append(product_id)
+        # Safe to use f-string here: update_fields list is built from a validated whitelist of field names above.
+        # Each field name (name, description, price, category_id, stock_quantity, image_url, is_active) is hardcoded
+        # in the if statements, so no user input can inject SQL.
         query = f"UPDATE products SET {', '.join(update_fields)} WHERE id = %s"
         
         cursor.execute(query, params)
@@ -364,6 +369,8 @@ def update_category(category_id):
             return jsonify({'error': 'No fields to update'}), 400
         
         params.append(category_id)
+        # Safe to use f-string here: update_fields list is built from a validated whitelist of field names above.
+        # Each field name (name, description) is hardcoded in the if statements, so no user input can inject SQL.
         query = f"UPDATE categories SET {', '.join(update_fields)} WHERE id = %s"
         
         cursor.execute(query, params)
@@ -1122,9 +1129,6 @@ def activate_user(user_id):
 def upload_product_image(product_id):
     """Upload product image file"""
     try:
-        import uuid
-        from werkzeug.utils import secure_filename
-        
         if 'image_file' not in request.files:
             return jsonify({'error': 'No image file provided'}), 400
         
@@ -1142,7 +1146,9 @@ def upload_product_image(product_id):
             return jsonify({'error': 'Invalid file type. Allowed: png, jpg, jpeg, gif'}), 400
         
         # Create upload directory if it doesn't exist
-        upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'uploads', 'products')
+        # Get the backend directory (parent of routes directory)
+        backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        upload_dir = os.path.join(backend_dir, 'static', 'uploads', 'products')
         os.makedirs(upload_dir, exist_ok=True)
         
         # Generate unique filename

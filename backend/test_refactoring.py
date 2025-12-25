@@ -32,18 +32,20 @@ def test_endpoint_counts():
     """Count endpoints in each module"""
     print("\n📊 Counting endpoints...")
     
-    files = {
-        'routes/products.py': 'products_bp.route',
-        'routes/cart.py': 'cart_bp.route',
-        'routes/orders.py': 'orders_bp.route',
-        'routes/admin.py': 'admin_bp.route',
-    }
+    files_to_check = [
+        ('routes/products.py', 'products_bp'),
+        ('routes/cart.py', 'cart_bp'),
+        ('routes/orders.py', 'orders_bp'),
+        ('routes/admin.py', 'admin_bp'),
+    ]
     
-    for filename, search_term in files.items():
+    for filename, blueprint_name in files_to_check:
         try:
             with open(filename, 'r') as f:
                 content = f.read()
-                count = content.count('@' + search_term.split('.')[0].replace('_bp', '_bp.route'))
+                # Count occurrences of @blueprint_name.route decorator
+                route_decorator = f"@{blueprint_name}.route"
+                count = content.count(route_decorator)
                 print(f"  {filename}: {count} endpoints")
         except FileNotFoundError:
             print(f"  ⚠️  {filename} not found")
