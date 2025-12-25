@@ -50,3 +50,7 @@ tmp/
 
 # Node modules (if any)
 node_modules/
+
+# Uploaded files (but keep directory structure)
+backend/static/uploads/**/*
+!backend/static/uploads/**/.gitkeep
