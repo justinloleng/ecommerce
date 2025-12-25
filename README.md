@@ -19,6 +19,8 @@ A full-featured e-commerce platform with customer and admin interfaces.
 - **Category Management**: Create, edit, and delete product categories
 - **Inventory Tracking**: Monitor and update stock levels
 - **Order Processing Workflow**: Progress orders through fulfillment stages
+- **Sales Reports**: Generate daily, weekly, and monthly sales reports with statistics
+- **User Management**: Reset passwords, activate/deactivate customer accounts
 
 ## How to Run the System
 
@@ -111,6 +113,15 @@ Customer Cancels → Cancelled (only for pending orders)
 - `POST /api/admin/categories` - Create category
 - `PUT /api/admin/categories/:id` - Update category
 - `DELETE /api/admin/categories/:id` - Delete category
+
+### Admin Reports Endpoints
+- `GET /api/admin/reports/sales` - Get sales reports (daily/weekly/monthly)
+
+### Admin User Management Endpoints
+- `GET /api/admin/users` - Get all users
+- `PUT /api/admin/users/:id/reset-password` - Reset user password
+- `PUT /api/admin/users/:id/deactivate` - Deactivate user account
+- `PUT /api/admin/users/:id/activate` - Activate user account
 
 For complete API documentation, see the backend logs when starting the server.
 
