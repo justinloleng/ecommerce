@@ -1192,6 +1192,17 @@
       e.preventDefault();
       
       const productId = document.getElementById('productId').value;
+      
+      // Validate file size if a file is selected (max 16MB)
+      const imageFile = document.getElementById('productImageFile').files[0];
+      if (imageFile) {
+        const maxSize = 16 * 1024 * 1024; // 16MB in bytes
+        if (imageFile.size > maxSize) {
+          showToast('Image file size must be less than 16MB', 'error');
+          return;
+        }
+      }
+      
       const productData = {
         name: document.getElementById('productName').value,
         description: document.getElementById('productDescription').value,
@@ -1221,20 +1232,24 @@
         const savedProduct = await response.json();
         const savedProductId = savedProduct.product?.id || productId;
 
+        let uploadSucceeded = true;
         // Check if a file was selected for upload
-        const imageFile = document.getElementById('productImageFile').files[0];
         if (imageFile && savedProductId) {
           try {
             showToast('Uploading image...', 'info');
             const imageUrl = await uploadProductImage(savedProductId, imageFile);
             showToast('Image uploaded successfully', 'success');
           } catch (uploadError) {
+            uploadSucceeded = false;
             console.error('Error uploading image:', uploadError);
             showToast('Product saved but image upload failed: ' + uploadError.message, 'error');
           }
         }
 
-        showToast(productId ? 'Product updated successfully' : 'Product created successfully', 'success');
+        // Only show product save success if image upload also succeeded (or no image was uploaded)
+        if (uploadSucceeded) {
+          showToast(productId ? 'Product updated successfully' : 'Product created successfully', 'success');
+        }
         closeModal('productModal');
         loadProducts();
       } catch (error) {
