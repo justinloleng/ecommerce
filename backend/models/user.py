@@ -95,8 +95,8 @@ class User(UserMixin):
             'last_name': self.last_name,
             'address': self.address,
             'phone': self.phone,
-            'is_active': self.is_active,
-            'is_admin': self.is_admin,
+            'is_active': 1 if self.is_active else 0,
+            'is_admin': 1 if self.is_admin else 0,
             'created_at': str(self.created_at) if self.created_at else None,
             'updated_at': str(self.updated_at) if self.updated_at else None
         }

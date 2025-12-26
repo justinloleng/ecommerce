@@ -501,7 +501,7 @@
             </div>
             <div class="stat-info">
               <h3 id="cancelledCount">0</h3>
-              <p>Cancelled/Declined</p>
+              <p>Cancelled Orders</p>
             </div>
           </div>
         </div>
@@ -913,6 +913,15 @@
     // ========== ORDERS MANAGEMENT ==========
     async function loadOrders() {
       try {
+        // Show loading state
+        const tbody = document.getElementById('ordersTableBody');
+        tbody.innerHTML = `
+          <tr><td colspan="7" class="empty-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading orders...</p>
+          </td></tr>
+        `;
+
         const response = await fetch(`${API_BASE_URL}/admin/orders`);
         
         if (!response.ok) {
@@ -983,7 +992,8 @@
       const pending = orders.filter(o => o.status === 'pending').length;
       const processing = orders.filter(o => o.status === 'processing').length;
       const completed = orders.filter(o => o.status === 'delivered').length;
-      const cancelled = orders.filter(o => o.status === 'cancelled' || o.status === 'declined').length;
+      // Only count cancelled orders (customer-initiated), not declined (admin already handled)
+      const cancelled = orders.filter(o => o.status === 'cancelled').length;
 
       document.getElementById('pendingCount').textContent = pending;
       document.getElementById('processingCount').textContent = processing;
@@ -1093,6 +1103,15 @@
 
     async function loadProducts() {
       try {
+        // Show loading state
+        const tbody = document.getElementById('productsTableBody');
+        tbody.innerHTML = `
+          <tr><td colspan="7" class="empty-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading products...</p>
+          </td></tr>
+        `;
+
         const response = await fetch(`${API_BASE_URL}/products?per_page=100`);
         
         if (!response.ok) {
@@ -1281,6 +1300,15 @@
     // ========== CATEGORIES MANAGEMENT ==========
     async function loadCategories() {
       try {
+        // Show loading state
+        const tbody = document.getElementById('categoriesTableBody');
+        tbody.innerHTML = `
+          <tr><td colspan="5" class="empty-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading categories...</p>
+          </td></tr>
+        `;
+
         const response = await fetch(`${API_BASE_URL}/products/categories`);
         
         if (!response.ok) {
@@ -1581,6 +1609,15 @@
 
     async function loadUsers() {
       try {
+        // Show loading state
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = `
+          <tr><td colspan="9" class="empty-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading users...</p>
+          </td></tr>
+        `;
+
         const response = await fetch(`${API_BASE_URL}/admin/users`);
         
         if (!response.ok) {
