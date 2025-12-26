@@ -86,7 +86,12 @@ class User(UserMixin):
         return re.match(pattern, email) is not None
     
     def to_dict(self):
-        """Convert user to dictionary (without password)"""
+        """Convert user to dictionary (without password)
+        
+        Note: is_active and is_admin are stored internally as booleans for Python clarity,
+        but converted to integers (0/1) for the API response to maintain compatibility
+        with frontend strict equality checks (e.g., is_admin === 1).
+        """
         return {
             'id': self.id,
             'username': self.username,

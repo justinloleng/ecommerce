@@ -175,7 +175,7 @@ function displayOrders(orders) {
     .join("");
 }
 
-function filterOrders(status) {
+function filterOrders(status, event) {
   // Get all order cards
   const orderCards = document.querySelectorAll(".order-card");
   const ordersContent = document.getElementById("ordersContent");
@@ -184,7 +184,9 @@ function filterOrders(status) {
   document.querySelectorAll(".filter-btn").forEach((btn) => {
     btn.classList.remove("active");
   });
-  event.target.classList.add("active");
+  if (event && event.target) {
+    event.target.classList.add("active");
+  }
 
   // Remove any existing empty state first
   const existingEmptyState = ordersContent.querySelector(".empty-state");
