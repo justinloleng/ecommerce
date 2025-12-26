@@ -164,8 +164,8 @@ function renderOrderCard(order) {
 function displayOrders(orders) {
   const ordersContent = document.getElementById("ordersContent");
   
-  // Store orders data globally for filtering
-  allOrdersData = orders;
+  // Store orders data globally for filtering (with safety check)
+  allOrdersData = orders || [];
 
   if (!orders || orders.length === 0) {
     ordersContent.innerHTML = `
@@ -190,6 +190,12 @@ function filterOrders(status, event) {
   });
   if (event && event.target) {
     event.target.classList.add("active");
+  }
+
+  // Safety check: ensure allOrdersData is available
+  if (!allOrdersData) {
+    console.warn("No orders data available for filtering");
+    return;
   }
 
   // Filter orders data based on status
