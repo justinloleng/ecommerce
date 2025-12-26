@@ -122,7 +122,7 @@ function renderOrderCard(order) {
                     <div class="item-details">
                         <div class="item-name">${escapeHtml(item.name)}</div>
                         <div class="item-quantity">Quantity: ${
-                          item.quantity
+                          escapeHtml(String(item.quantity))
                         }</div>
                         <div class="item-price">$${(
                           item.price_at_time * item.quantity
@@ -157,14 +157,14 @@ function renderOrderCard(order) {
             ${
               order.status === "pending"
                 ? `
-                <button class="btn-cancel" onclick="cancelOrder(${order.id})">
+                <button class="btn-cancel" onclick="cancelOrder(${parseInt(order.id, 10)})">
                     <i class="fas fa-times"></i> Cancel Order
                 </button>
             `
                 : ""
             }
             <button class="btn-view-details" onclick="viewOrderDetails(${
-              order.id
+              parseInt(order.id, 10)
             })">
                 <i class="fas fa-eye"></i> View Details
             </button>
