@@ -69,6 +69,14 @@ async function loadOrders() {
   }
 }
 
+// Helper function to escape HTML to prevent XSS
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
 function renderOrderCard(order) {
   return `
     <div class="order-card" data-status="${order.status}">
@@ -96,7 +104,7 @@ function renderOrderCard(order) {
         </div>
 
         <div class="order-items">
-            ${order.items
+            ${(order.items || [])
               .map(
                 (item) => `
                 <div class="order-item">
@@ -130,7 +138,7 @@ function renderOrderCard(order) {
                     <i class="fas fa-info-circle"></i> Order Declined
                 </strong>
                 <p style="color: #666; margin: 5px 0 0 0;">
-                    Reason: ${order.decline_reason}
+                    Reason: ${escapeHtml(order.decline_reason)}
                 </p>
             </div>
         `
