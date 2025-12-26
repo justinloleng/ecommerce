@@ -72,8 +72,10 @@ async function loadOrders() {
 // Helper function to escape HTML to prevent XSS
 function escapeHtml(text) {
   if (!text) return '';
+  // Convert to string if not already a string
+  const textStr = String(text);
   const div = document.createElement('div');
-  div.textContent = text;
+  div.textContent = textStr;
   return div.innerHTML;
 }
 
@@ -104,7 +106,7 @@ function renderOrderCard(order) {
         </div>
 
         <div class="order-items">
-            ${(order.items || [])
+            ${(Array.isArray(order.items) ? order.items : [])
               .map(
                 (item) => `
                 <div class="order-item">
@@ -200,9 +202,15 @@ function filterOrders(status, event) {
     event.target.classList.add("active");
   }
 
-  // Safety check: ensure allOrdersData is available
-  if (!allOrdersData) {
-    console.warn("No orders data available for filtering");
+  // Safety check: ensure allOrdersData is available and is an array
+  if (!Array.isArray(allOrdersData) || allOrdersData.length === 0) {
+    ordersContent.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <h3>No orders found</h3>
+        <p>No orders available.</p>
+      </div>
+    `;
     return;
   }
 
