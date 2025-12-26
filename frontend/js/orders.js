@@ -69,6 +69,98 @@ async function loadOrders() {
   }
 }
 
+function renderOrderCard(order) {
+  return `
+    <div class="order-card" data-status="${order.status}">
+        <div class="order-header">
+            <div>
+                <div class="order-id">${
+                  order.order_number || "Order #" + order.id
+                }</div>
+                <div class="order-date">
+                    <i class="fas fa-calendar"></i> ${new Date(
+                      order.created_at
+                    ).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                </div>
+            </div>
+            <span class="order-status status-${order.status}">
+                ${
+                  order.status.charAt(0).toUpperCase() +
+                  order.status.slice(1).replace("_", " ")
+                }
+            </span>
+        </div>
+
+        <div class="order-items">
+            ${order.items
+              .map(
+                (item) => `
+                <div class="order-item">
+                    <img src="${
+                      item.image_url ||
+                      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300"
+                    }" 
+                         alt="${item.name}" 
+                         class="item-image"
+                         onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300'">
+                    <div class="item-details">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-quantity">Quantity: ${
+                          item.quantity
+                        }</div>
+                        <div class="item-price">$${(
+                          item.price_at_time * item.quantity
+                        ).toFixed(2)}</div>
+                    </div>
+                </div>
+            `
+              )
+              .join("")}
+        </div>
+
+        ${
+          order.status === "declined" && order.decline_reason
+            ? `
+            <div style="background: #ffebee; border-left: 4px solid #f44336; padding: 15px; margin: 15px 0; border-radius: 8px;">
+                <strong style="color: #c62828;">
+                    <i class="fas fa-info-circle"></i> Order Declined
+                </strong>
+                <p style="color: #666; margin: 5px 0 0 0;">
+                    Reason: ${order.decline_reason}
+                </p>
+            </div>
+        `
+            : ""
+        }
+
+        <div class="order-total">
+            Total: $${order.total_amount.toFixed(2)}
+        </div>
+
+        <div class="order-actions">
+            ${
+              order.status === "pending"
+                ? `
+                <button class="btn-cancel" onclick="cancelOrder(${order.id})">
+                    <i class="fas fa-times"></i> Cancel Order
+                </button>
+            `
+                : ""
+            }
+            <button class="btn-view-details" onclick="viewOrderDetails(${
+              order.id
+            })">
+                <i class="fas fa-eye"></i> View Details
+            </button>
+        </div>
+    </div>
+  `;
+}
+
 function displayOrders(orders) {
   const ordersContent = document.getElementById("ordersContent");
   
@@ -86,99 +178,7 @@ function displayOrders(orders) {
     return;
   }
 
-  ordersContent.innerHTML = orders
-    .map(
-      (order) => `
-        <div class="order-card" data-status="${order.status}">
-            <div class="order-header">
-                <div>
-                    <div class="order-id">${
-                      order.order_number || "Order #" + order.id
-                    }</div>
-                    <div class="order-date">
-                        <i class="fas fa-calendar"></i> ${new Date(
-                          order.created_at
-                        ).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                    </div>
-                </div>
-                <span class="order-status status-${order.status}">
-                    ${
-                      order.status.charAt(0).toUpperCase() +
-                      order.status.slice(1).replace("_", " ")
-                    }
-                </span>
-            </div>
-
-            <div class="order-items">
-                ${order.items
-                  .map(
-                    (item) => `
-                    <div class="order-item">
-                        <img src="${
-                          item.image_url ||
-                          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300"
-                        }" 
-                             alt="${item.name}" 
-                             class="item-image"
-                             onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300'">
-                        <div class="item-details">
-                            <div class="item-name">${item.name}</div>
-                            <div class="item-quantity">Quantity: ${
-                              item.quantity
-                            }</div>
-                            <div class="item-price">$${(
-                              item.price_at_time * item.quantity
-                            ).toFixed(2)}</div>
-                        </div>
-                    </div>
-                `
-                  )
-                  .join("")}
-            </div>
-
-            ${
-              order.status === "declined" && order.decline_reason
-                ? `
-                <div style="background: #ffebee; border-left: 4px solid #f44336; padding: 15px; margin: 15px 0; border-radius: 8px;">
-                    <strong style="color: #c62828;">
-                        <i class="fas fa-info-circle"></i> Order Declined
-                    </strong>
-                    <p style="color: #666; margin: 5px 0 0 0;">
-                        Reason: ${order.decline_reason}
-                    </p>
-                </div>
-            `
-                : ""
-            }
-
-            <div class="order-total">
-                Total: $${order.total_amount.toFixed(2)}
-            </div>
-
-            <div class="order-actions">
-                ${
-                  order.status === "pending"
-                    ? `
-                    <button class="btn-cancel" onclick="cancelOrder(${order.id})">
-                        <i class="fas fa-times"></i> Cancel Order
-                    </button>
-                `
-                    : ""
-                }
-                <button class="btn-view-details" onclick="viewOrderDetails(${
-                  order.id
-                })">
-                    <i class="fas fa-eye"></i> View Details
-                </button>
-            </div>
-        </div>
-    `
-    )
-    .join("");
+  ordersContent.innerHTML = orders.map(order => renderOrderCard(order)).join("");
 }
 
 function filterOrders(status, event) {
@@ -208,100 +208,8 @@ function filterOrders(status, event) {
       </div>
     `;
   } else {
-    // Re-render the filtered orders
-    ordersContent.innerHTML = filteredOrders
-      .map(
-        (order) => `
-        <div class="order-card" data-status="${order.status}">
-            <div class="order-header">
-                <div>
-                    <div class="order-id">${
-                      order.order_number || "Order #" + order.id
-                    }</div>
-                    <div class="order-date">
-                        <i class="fas fa-calendar"></i> ${new Date(
-                          order.created_at
-                        ).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                    </div>
-                </div>
-                <span class="order-status status-${order.status}">
-                    ${
-                      order.status.charAt(0).toUpperCase() +
-                      order.status.slice(1).replace("_", " ")
-                    }
-                </span>
-            </div>
-
-            <div class="order-items">
-                ${order.items
-                  .map(
-                    (item) => `
-                    <div class="order-item">
-                        <img src="${
-                          item.image_url ||
-                          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300"
-                        }" 
-                             alt="${item.name}" 
-                             class="item-image"
-                             onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300'">
-                        <div class="item-details">
-                            <div class="item-name">${item.name}</div>
-                            <div class="item-quantity">Quantity: ${
-                              item.quantity
-                            }</div>
-                            <div class="item-price">$${(
-                              item.price_at_time * item.quantity
-                            ).toFixed(2)}</div>
-                        </div>
-                    </div>
-                `
-                  )
-                  .join("")}
-            </div>
-
-            ${
-              order.status === "declined" && order.decline_reason
-                ? `
-                <div style="background: #ffebee; border-left: 4px solid #f44336; padding: 15px; margin: 15px 0; border-radius: 8px;">
-                    <strong style="color: #c62828;">
-                        <i class="fas fa-info-circle"></i> Order Declined
-                    </strong>
-                    <p style="color: #666; margin: 5px 0 0 0;">
-                        Reason: ${order.decline_reason}
-                    </p>
-                </div>
-            `
-                : ""
-            }
-
-            <div class="order-total">
-                Total: $${order.total_amount.toFixed(2)}
-            </div>
-
-            <div class="order-actions">
-                ${
-                  order.status === "pending"
-                    ? `
-                    <button class="btn-cancel" onclick="cancelOrder(${order.id})">
-                        <i class="fas fa-times"></i> Cancel Order
-                    </button>
-                `
-                    : ""
-                }
-                <button class="btn-view-details" onclick="viewOrderDetails(${
-                  order.id
-                })">
-                    <i class="fas fa-eye"></i> View Details
-                </button>
-            </div>
-        </div>
-    `
-      )
-      .join("");
+    // Re-render the filtered orders using the shared template function
+    ordersContent.innerHTML = filteredOrders.map(order => renderOrderCard(order)).join("");
   }
 }
 
