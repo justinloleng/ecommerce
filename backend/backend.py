@@ -170,6 +170,10 @@ def login():
         if not bcrypt.checkpw(data['password'].encode('utf-8'), user['password_hash'].encode('utf-8')):
             return jsonify({'error': 'Invalid credentials'}), 401
         
+        # Check if account is deactivated
+        if not user.get('is_active', True):
+            return jsonify({'error': 'Your account has been deactivated. Please contact support.'}), 403
+        
         user.pop('password_hash', None)
         
         return jsonify({
