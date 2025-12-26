@@ -81,11 +81,11 @@ function escapeHtml(text) {
 
 function renderOrderCard(order) {
   return `
-    <div class="order-card" data-status="${order.status}">
+    <div class="order-card" data-status="${escapeHtml(order.status)}">
         <div class="order-header">
             <div>
                 <div class="order-id">${
-                  order.order_number || "Order #" + order.id
+                  escapeHtml(order.order_number) || "Order #" + escapeHtml(String(order.id))
                 }</div>
                 <div class="order-date">
                     <i class="fas fa-calendar"></i> ${new Date(
@@ -97,10 +97,12 @@ function renderOrderCard(order) {
                     })}
                 </div>
             </div>
-            <span class="order-status status-${order.status}">
+            <span class="order-status status-${escapeHtml(order.status)}">
                 ${
-                  order.status.charAt(0).toUpperCase() +
-                  order.status.slice(1).replace("_", " ")
+                  escapeHtml(
+                    order.status.charAt(0).toUpperCase() +
+                    order.status.slice(1).replace("_", " ")
+                  )
                 }
             </span>
         </div>
@@ -114,11 +116,11 @@ function renderOrderCard(order) {
                       item.image_url ||
                       "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300"
                     }" 
-                         alt="${item.name}" 
+                         alt="${escapeHtml(item.name)}" 
                          class="item-image"
                          onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300'">
                     <div class="item-details">
-                        <div class="item-name">${item.name}</div>
+                        <div class="item-name">${escapeHtml(item.name)}</div>
                         <div class="item-quantity">Quantity: ${
                           item.quantity
                         }</div>
