@@ -175,15 +175,24 @@ function displayOrders(orders) {
     .join("");
 }
 
-function filterOrders(status) {
+function filterOrders(status, event) {
   // Get all order cards
   const orderCards = document.querySelectorAll(".order-card");
+  const ordersContent = document.getElementById("ordersContent");
 
   // Update active button
   document.querySelectorAll(".filter-btn").forEach((btn) => {
     btn.classList.remove("active");
   });
-  event.target.classList.add("active");
+  if (event && event.target) {
+    event.target.classList.add("active");
+  }
+
+  // Remove any existing empty state first
+  const existingEmptyState = ordersContent.querySelector(".empty-state");
+  if (existingEmptyState) {
+    existingEmptyState.remove();
+  }
 
   // Filter orders by status
   orderCards.forEach((card) => {
@@ -198,7 +207,6 @@ function filterOrders(status) {
   const visibleOrders = Array.from(orderCards).filter(
     (card) => card.style.display !== "none"
   );
-  const ordersContent = document.getElementById("ordersContent");
 
   if (visibleOrders.length === 0) {
     // Show empty state for the filter
@@ -210,12 +218,6 @@ function filterOrders(status) {
             <p>No orders match this filter.</p>
         `;
     ordersContent.appendChild(emptyState);
-  } else {
-    // Remove empty state if it exists
-    const emptyState = ordersContent.querySelector(".empty-state");
-    if (emptyState) {
-      emptyState.remove();
-    }
   }
 }
 

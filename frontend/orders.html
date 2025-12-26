@@ -47,25 +47,25 @@
         </div>
 
         <div class="filter-section">
-          <button class="filter-btn active" onclick="filterOrders('all')">
+          <button class="filter-btn active" onclick="filterOrders('all', event)">
             All Orders
           </button>
-          <button class="filter-btn" onclick="filterOrders('pending')">
+          <button class="filter-btn" onclick="filterOrders('pending', event)">
             Pending
           </button>
-          <button class="filter-btn" onclick="filterOrders('processing')">
+          <button class="filter-btn" onclick="filterOrders('processing', event)">
             Processing
           </button>
-          <button class="filter-btn" onclick="filterOrders('shipped')">
+          <button class="filter-btn" onclick="filterOrders('shipped', event)">
             Shipped
           </button>
-          <button class="filter-btn" onclick="filterOrders('delivered')">
+          <button class="filter-btn" onclick="filterOrders('delivered', event)">
             Delivered
           </button>
-          <button class="filter-btn" onclick="filterOrders('cancelled')">
+          <button class="filter-btn" onclick="filterOrders('cancelled', event)">
             Cancelled
           </button>
-          <button class="filter-btn" onclick="filterOrders('declined')">
+          <button class="filter-btn" onclick="filterOrders('declined', event)">
             Declined
           </button>
         </div>
