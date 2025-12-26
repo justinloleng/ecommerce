@@ -146,7 +146,9 @@ def get_user_orders(user_id):
         cursor = conn.cursor(dictionary=True)
         
         cursor.execute("""
-            SELECT o.*, 
+            SELECT o.id, o.user_id, o.order_number, o.total_amount, 
+                   o.shipping_address, o.payment_method, o.status, 
+                   o.decline_reason, o.created_at, o.updated_at,
                    COUNT(oi.id) as item_count
             FROM orders o
             LEFT JOIN order_items oi ON o.id = oi.order_id
