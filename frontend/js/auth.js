@@ -217,9 +217,11 @@ async function handleRegister(event) {
         localStorage.setItem("user", JSON.stringify(result.user));
       }
       
-      // Auto-login after successful registration
+      // Auto-login after successful registration - redirect based on admin status
+      const redirectUrl = result.user?.is_admin === 1 ? "admin.html" : "dashboard.html";
+      
       setTimeout(() => {
-        window.location.href = "dashboard.html";
+        window.location.href = redirectUrl;
       }, 1500);
     } else {
       showToast(result.error || "Registration failed", "error");
@@ -268,8 +270,11 @@ async function handleLogin(event) {
 
       localStorage.setItem("user", JSON.stringify(result.user));
 
+      // Redirect admin users to admin dashboard, regular users to customer dashboard
+      const redirectUrl = result.user?.is_admin === 1 ? "admin.html" : "dashboard.html";
+
       setTimeout(() => {
-        window.location.href = "dashboard.html";
+        window.location.href = redirectUrl;
       }, 1000);
     } else {
       showToast(result.error || "Login failed", "error");
