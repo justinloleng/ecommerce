@@ -429,6 +429,33 @@
         width: 100%;
       }
     }
+
+    .filter-section {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .order-filter-btn {
+      padding: 10px 20px;
+      border: 2px solid #667eea;
+      background: white;
+      color: #667eea;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .order-filter-btn:hover {
+      background: #f0f0f8;
+    }
+
+    .order-filter-btn.active {
+      background: #667eea;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -509,6 +536,31 @@
         <div class="section-header">
           <h2>Manage Orders</h2>
         </div>
+        
+        <div class="filter-section">
+          <button class="order-filter-btn active" onclick="filterAdminOrders('all', event)">
+            All Orders
+          </button>
+          <button class="order-filter-btn" onclick="filterAdminOrders('pending', event)">
+            Pending
+          </button>
+          <button class="order-filter-btn" onclick="filterAdminOrders('processing', event)">
+            Processing
+          </button>
+          <button class="order-filter-btn" onclick="filterAdminOrders('shipped', event)">
+            Shipped
+          </button>
+          <button class="order-filter-btn" onclick="filterAdminOrders('delivered', event)">
+            Delivered
+          </button>
+          <button class="order-filter-btn" onclick="filterAdminOrders('cancelled', event)">
+            Cancelled
+          </button>
+          <button class="order-filter-btn" onclick="filterAdminOrders('declined', event)">
+            Declined
+          </button>
+        </div>
+        
         <div class="table-container">
           <table>
             <thead>
@@ -965,7 +1017,7 @@
           <td>${new Date(order.created_at).toLocaleDateString()}</td>
           <td>${order.item_count} item(s)</td>
           <td><strong>$${order.total_amount.toFixed(2)}</strong></td>
-          <td><span class="badge badge-${order.status}">${order.status}</span></td>
+          <td><span class="badge badge-${order.status}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span></td>
           <td>
             ${order.status === 'pending' ? `
               <button class="btn btn-success btn-sm" onclick="approveOrder(${order.id})">
@@ -999,6 +1051,23 @@
       document.getElementById('processingCount').textContent = processing;
       document.getElementById('completedCount').textContent = completed;
       document.getElementById('cancelledCount').textContent = cancelled;
+    }
+
+    function filterAdminOrders(status, event) {
+      // Update active button styling using CSS classes
+      document.querySelectorAll('.order-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      if (event && event.target) {
+        event.target.classList.add('active');
+      }
+
+      // Filter and display orders
+      const filteredOrders = status === 'all' 
+        ? currentOrders 
+        : currentOrders.filter(order => order.status === status);
+      
+      displayOrders(filteredOrders);
     }
 
     async function approveOrder(orderId) {
