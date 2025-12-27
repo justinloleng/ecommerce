@@ -538,6 +538,15 @@
                 <p>Cancelled Orders</p>
               </div>
             </div>
+            <div class="stat-card">
+              <div class="stat-icon red">
+                <i class="fas fa-ban"></i>
+              </div>
+              <div class="stat-info">
+                <h3 id="declinedCount">0</h3>
+                <p>Declined Orders</p>
+              </div>
+            </div>
           </div>
 
           <div class="section-header">
@@ -1223,13 +1232,14 @@
           (o) => o.status === "processing"
         ).length;
         const completed = orders.filter((o) => o.status === "delivered").length;
-        // Only count cancelled orders (customer-initiated), not declined (admin already handled)
         const cancelled = orders.filter((o) => o.status === "cancelled").length;
+        const declined = orders.filter((o) => o.status === "declined").length;
 
         document.getElementById("pendingCount").textContent = pending;
         document.getElementById("processingCount").textContent = processing;
         document.getElementById("completedCount").textContent = completed;
         document.getElementById("cancelledCount").textContent = cancelled;
+        document.getElementById("declinedCount").textContent = declined;
       }
 
       function filterAdminOrders(status, event) {
