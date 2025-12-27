@@ -509,6 +509,31 @@
         <div class="section-header">
           <h2>Manage Orders</h2>
         </div>
+        
+        <div class="filter-section" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="filter-btn active" onclick="filterAdminOrders('all', event)" style="padding: 10px 20px; border: 2px solid #667eea; background: #667eea; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+            All Orders
+          </button>
+          <button class="filter-btn" onclick="filterAdminOrders('pending', event)" style="padding: 10px 20px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+            Pending
+          </button>
+          <button class="filter-btn" onclick="filterAdminOrders('processing', event)" style="padding: 10px 20px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+            Processing
+          </button>
+          <button class="filter-btn" onclick="filterAdminOrders('shipped', event)" style="padding: 10px 20px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+            Shipped
+          </button>
+          <button class="filter-btn" onclick="filterAdminOrders('delivered', event)" style="padding: 10px 20px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+            Delivered
+          </button>
+          <button class="filter-btn" onclick="filterAdminOrders('cancelled', event)" style="padding: 10px 20px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+            Cancelled
+          </button>
+          <button class="filter-btn" onclick="filterAdminOrders('declined', event)" style="padding: 10px 20px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+            Declined
+          </button>
+        </div>
+        
         <div class="table-container">
           <table>
             <thead>
@@ -965,7 +990,7 @@
           <td>${new Date(order.created_at).toLocaleDateString()}</td>
           <td>${order.item_count} item(s)</td>
           <td><strong>$${order.total_amount.toFixed(2)}</strong></td>
-          <td><span class="badge badge-${order.status}">${order.status}</span></td>
+          <td><span class="badge badge-${order.status}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span></td>
           <td>
             ${order.status === 'pending' ? `
               <button class="btn btn-success btn-sm" onclick="approveOrder(${order.id})">
@@ -999,6 +1024,25 @@
       document.getElementById('processingCount').textContent = processing;
       document.getElementById('completedCount').textContent = completed;
       document.getElementById('cancelledCount').textContent = cancelled;
+    }
+
+    function filterAdminOrders(status, event) {
+      // Update active button styling
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.style.background = 'white';
+        btn.style.color = '#667eea';
+      });
+      if (event && event.target) {
+        event.target.style.background = '#667eea';
+        event.target.style.color = 'white';
+      }
+
+      // Filter and display orders
+      const filteredOrders = status === 'all' 
+        ? currentOrders 
+        : currentOrders.filter(order => order.status === status);
+      
+      displayOrders(filteredOrders);
     }
 
     async function approveOrder(orderId) {
