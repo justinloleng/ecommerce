@@ -336,6 +336,22 @@ def cancel_order(order_id):
             conn.close()
             return jsonify({'error': 'Only pending orders can be cancelled'}), 400
         
+        # Get order items to replenish stock
+        cursor.execute("""
+            SELECT product_id, quantity 
+            FROM order_items 
+            WHERE order_id = %s
+        """, (order_id,))
+        order_items = cursor.fetchall()
+        
+        # Replenish stock for each item
+        for item in order_items:
+            cursor.execute("""
+                UPDATE products 
+                SET stock_quantity = stock_quantity + %s 
+                WHERE id = %s
+            """, (item['quantity'], item['product_id']))
+        
         # Update order status to cancelled
         cursor.execute("UPDATE orders SET status = 'cancelled' WHERE id = %s", (order_id,))
         
