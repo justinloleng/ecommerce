@@ -122,6 +122,24 @@
         color: #721c24;
       }
 
+      .decline-reason-section {
+        display: none;
+        background: #ffebee;
+        border-left: 4px solid #f44336;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 8px;
+      }
+
+      .decline-reason-section strong {
+        color: #c62828;
+      }
+
+      .decline-reason-section p {
+        color: #666;
+        margin: 5px 0 0 0;
+      }
+
       .section-title {
         font-size: 1.3rem;
         color: #2d3748;
@@ -409,11 +427,11 @@
               <span class="order-status" id="orderStatus"></span>
             </div>
 
-            <div id="declineReasonSection" style="display: none; background: #ffebee; border-left: 4px solid #f44336; padding: 15px; margin: 15px 0; border-radius: 8px;">
-              <strong style="color: #c62828;">
+            <div id="declineReasonSection" class="decline-reason-section">
+              <strong>
                 <i class="fas fa-info-circle"></i> Order Declined
               </strong>
-              <p style="color: #666; margin: 5px 0 0 0;">
+              <p>
                 Reason: <span id="declineReasonText"></span>
               </p>
             </div>
