@@ -97,6 +97,31 @@
         color: #084298;
       }
 
+      .status-shipped {
+        background: #d1ecf1;
+        color: #0c5460;
+      }
+
+      .status-in_transit {
+        background: #bee5eb;
+        color: #0c5460;
+      }
+
+      .status-delivered {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+      }
+
+      .status-declined {
+        background: #ffcccc;
+        color: #721c24;
+      }
+
       .section-title {
         font-size: 1.3rem;
         color: #2d3748;
@@ -384,6 +409,15 @@
               <span class="order-status" id="orderStatus"></span>
             </div>
 
+            <div id="declineReasonSection" style="display: none; background: #ffebee; border-left: 4px solid #f44336; padding: 15px; margin: 15px 0; border-radius: 8px;">
+              <strong style="color: #c62828;">
+                <i class="fas fa-info-circle"></i> Order Declined
+              </strong>
+              <p style="color: #666; margin: 5px 0 0 0;">
+                Reason: <span id="declineReasonText"></span>
+              </p>
+            </div>
+
             <h3 class="section-title">
               <i class="fas fa-shopping-basket"></i>
               Order Items
@@ -544,6 +578,12 @@
         statusElement.textContent =
           order.status.charAt(0).toUpperCase() + order.status.slice(1);
         statusElement.className = `order-status status-${order.status}`;
+
+        // Show decline reason if order is declined
+        if (order.status === 'declined' && order.decline_reason) {
+          document.getElementById('declineReasonSection').style.display = 'block';
+          document.getElementById('declineReasonText').textContent = order.decline_reason;
+        }
 
         // Order items
         const itemsList = document.getElementById("orderItemsList");
