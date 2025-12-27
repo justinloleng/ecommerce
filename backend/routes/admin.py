@@ -171,6 +171,22 @@ def decline_order(order_id):
             conn.close()
             return jsonify({'error': 'Only pending orders can be declined'}), 400
         
+        # Get order items to replenish stock
+        cursor.execute("""
+            SELECT product_id, quantity 
+            FROM order_items 
+            WHERE order_id = %s
+        """, (order_id,))
+        order_items = cursor.fetchall()
+        
+        # Replenish stock for each item
+        for item in order_items:
+            cursor.execute("""
+                UPDATE products 
+                SET stock_quantity = stock_quantity + %s 
+                WHERE id = %s
+            """, (item['quantity'], item['product_id']))
+        
         # Update order status to declined with reason
         cursor.execute("""
             UPDATE orders 
