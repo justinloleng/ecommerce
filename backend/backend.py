@@ -272,4 +272,4 @@ if __name__ == '__main__':
     print("   PUT  /api/admin/users/<id>/deactivate   - Deactivate user account")
     print("   PUT  /api/admin/users/<id>/activate     - Activate user account")
     
-    app.run(debug=True, port=5000)
+    app.run(debug=False, port=5000)
