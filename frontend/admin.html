@@ -429,6 +429,33 @@
         width: 100%;
       }
     }
+
+    .filter-section {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .order-filter-btn {
+      padding: 10px 20px;
+      border: 2px solid #667eea;
+      background: white;
+      color: #667eea;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .order-filter-btn:hover {
+      background: #f0f0f8;
+    }
+
+    .order-filter-btn.active {
+      background: #667eea;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -510,27 +537,29 @@
           <h2>Manage Orders</h2>
         </div>
         
-        <div class="filter-section" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-          <button class="filter-btn active" onclick="filterAdminOrders('all', event)" style="padding: 10px 20px; border: 2px solid #667eea; background: #667eea; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+        <div class="filter-section">
+          <button class="order-filter-btn active" onclick="filterAdminOrders('all', event)">
             All Orders
           </button>
-          <button class="filter-btn" onclick="filterAdminOrders('pending', event)" style="padding: 10px 20px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+          <button class="order-filter-btn" onclick="filterAdminOrders('pending', event)">
             Pending
           </button>
-          <button class="filter-btn" onclick="filterAdminOrders('processing', event)" style="padding: 10px 20px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+          <button class="order-filter-btn" onclick="filterAdminOrders('processing', event)">
             Processing
           </button>
-          <button class="filter-btn" onclick="filterAdminOrders('shipped', event)" style="padding: 10px 20px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+          <button class="order-filter-btn" onclick="filterAdminOrders('shipped', event)">
             Shipped
           </button>
-          <button class="filter-btn" onclick="filterAdminOrders('delivered', event)" style="padding: 10px 20px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+          <button class="order-filter-btn" onclick="filterAdminOrders('delivered', event)">
             Delivered
           </button>
-          <button class="filter-btn" onclick="filterAdminOrders('cancelled', event)" style="padding: 10px 20px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+          <button class="order-filter-btn" onclick="filterAdminOrders('cancelled', event)">
             Cancelled
           </button>
-          <button class="filter-btn" onclick="filterAdminOrders('declined', event)" style="padding: 10px 20px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+          <button class="order-filter-btn" onclick="filterAdminOrders('declined', event)">
             Declined
+          </button>
+        </div>
           </button>
         </div>
         
@@ -1027,14 +1056,12 @@
     }
 
     function filterAdminOrders(status, event) {
-      // Update active button styling
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.style.background = 'white';
-        btn.style.color = '#667eea';
+      // Update active button styling using CSS classes
+      document.querySelectorAll('.order-filter-btn').forEach(btn => {
+        btn.classList.remove('active');
       });
       if (event && event.target) {
-        event.target.style.background = '#667eea';
-        event.target.style.color = 'white';
+        event.target.classList.add('active');
       }
 
       // Filter and display orders
