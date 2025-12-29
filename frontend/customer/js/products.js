@@ -55,7 +55,7 @@ function setupNavigation() {
     const adminLink = document.getElementById('adminDashboardLink');
     if (adminLink) {
       adminLink.style.display = 'block';
-      adminLink.href = 'admin.html';
+      adminLink.href = '../admin/admin-panel.html';
     }
   }
   
