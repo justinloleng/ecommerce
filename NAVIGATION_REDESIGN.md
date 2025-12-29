@@ -9,6 +9,9 @@ The original navigation had several issues:
 - **Code duplication**: Navigation HTML/CSS was duplicated across 8 different HTML files
 - **Limited responsiveness**: No mobile hamburger menu or proper tablet optimization
 - **Not modular**: Changes required updating multiple files
+- **Inconsistent structure**: Customer pages didn't use `.nav-btn-text` spans for responsive text hiding
+- **Text inconsistencies**: Some pages used "Home" while others used "Dashboard"
+- **Logo variations**: Some pages had "E-Shop Dashboard" while others had "E-Shop"
 
 ## Design Decisions
 
@@ -103,14 +106,18 @@ The `nav-component.js` file provides:
 - `frontend/admin/styles/admin-panel.css` - Removed duplicate nav styles
 
 ### Customer Section
+All customer pages have been standardized to use consistent navigation structure:
 - `frontend/customer/index.html` - Login/Register page
-- `frontend/customer/dashboard.html` - User dashboard
-- `frontend/customer/products.html` - Product catalog
-- `frontend/customer/cart.html` - Shopping cart
-- `frontend/customer/checkout.html` - Checkout page
-- `frontend/customer/orders.html` - Order history
-- `frontend/customer/order-confirmation.html` - Order confirmation
+- `frontend/customer/dashboard.html` - User dashboard (updated navigation structure)
+- `frontend/customer/products.html` - Product catalog (updated navigation structure)
+- `frontend/customer/cart.html` - Shopping cart (updated navigation structure)
+- `frontend/customer/checkout.html` - Checkout page (updated navigation structure)
+- `frontend/customer/orders.html` - Order history (updated navigation structure)
+- `frontend/customer/order-confirmation.html` - Order confirmation (updated navigation structure)
 - `frontend/customer/css/style.css` - Removed duplicate nav styles
+
+### Test Files
+- `frontend/test-nav.html` - Navigation component test page demonstrating responsive behavior
 
 ## Testing Results
 
@@ -165,7 +172,14 @@ The navigation component is compatible with:
 ### Adding New Navigation Items
 1. Add the HTML for the new link/button in the `.navbar-actions` or `.nav-links` section
 2. Ensure icons are included for mobile/tablet views
-3. Add `.nav-btn-text` class to text that should hide on tablet
+3. **IMPORTANT**: Wrap link text in `<span class="nav-btn-text">` for proper responsive behavior
+4. Example structure:
+   ```html
+   <a href="page.html">
+     <i class="fas fa-icon"></i>
+     <span class="nav-btn-text">Link Text</span>
+   </a>
+   ```
 
 ### Customizing Styles
 1. Section-specific styles can be added to `admin-panel.css` or `style.css`
@@ -191,6 +205,39 @@ After redesign:
 - Full mobile support with hamburger menu
 - ~60% reduction in navigation-related CSS
 
+## Recent Updates (December 2025)
+
+### Customer Navigation Standardization
+All customer pages have been updated to use a consistent navigation structure that matches the admin design pattern:
+
+**Changes Made:**
+- ✅ All navigation links now wrap text in `<span class="nav-btn-text">` for responsive behavior
+- ✅ Consistent logo text: "E-Shop" across all pages
+- ✅ Consistent link labels: "Dashboard" (not "Home")
+- ✅ Removed inline styles from logout buttons (now handled by CSS)
+- ✅ Standardized href patterns (using `#` consistently)
+- ✅ Cart count badge properly positioned within responsive structure
+
+**Before:**
+```html
+<a href="dashboard.html">
+  <i class="fas fa-home"></i> Home
+</a>
+```
+
+**After:**
+```html
+<a href="dashboard.html">
+  <i class="fas fa-home"></i>
+  <span class="nav-btn-text">Dashboard</span>
+</a>
+```
+
+**Impact:**
+- On desktop (>992px): Full text visible next to icons
+- On tablet (768-992px): Text hidden, only icons show (space efficient)
+- On mobile (<768px): Hamburger menu with full text in dropdown
+
 ## Conclusion
 
 The navigation redesign successfully achieves:
@@ -200,5 +247,7 @@ The navigation redesign successfully achieves:
 4. ✅ Full responsive support (desktop, tablet, mobile)
 5. ✅ Improved accessibility and performance
 6. ✅ Better user experience across all devices
+7. ✅ Standardized navigation structure across all customer pages
+8. ✅ Proper responsive text hiding on tablet devices
 
 The implementation is production-ready and follows modern web development best practices.
