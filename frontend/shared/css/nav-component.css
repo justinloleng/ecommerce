@@ -72,6 +72,7 @@
 /* Brand text gradient */
 .brand-name,
 .logo span {
+  color: white; /* Fallback for browsers without background-clip support */
   background: linear-gradient(to right, #fff, #f0f0ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

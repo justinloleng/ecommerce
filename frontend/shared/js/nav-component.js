@@ -29,13 +29,8 @@
       toggleBtn.setAttribute('aria-label', 'Toggle mobile menu');
       toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
       
-      // Insert before navbar-actions or nav-links
-      const navActions = navbar.querySelector('.navbar-actions') || navbar.querySelector('.nav-links');
-      if (navActions) {
-        navbar.insertBefore(toggleBtn, navActions.nextSibling);
-      } else {
-        navbar.appendChild(toggleBtn);
-      }
+      // Insert as last child of navbar
+      navbar.appendChild(toggleBtn);
     }
 
     // Get the navigation links container
@@ -58,7 +53,7 @@
     });
 
     // Close menu when clicking on a link
-    const navLinks = navActions.querySelectorAll('a, button:not(.mobile-menu-toggle)');
+    const navLinks = navActions.querySelectorAll('.nav-btn, .nav-links a');
     navLinks.forEach(function(link) {
       link.addEventListener('click', function() {
         if (window.innerWidth <= 768) {
