@@ -221,6 +221,20 @@
         }
       }
 
+      /* Respect user motion preferences */
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+        
+        .action-card:hover,
+        .stat:hover {
+          transform: none;
+        }
+      }
+
       .toast {
         display: none;
         position: fixed;
