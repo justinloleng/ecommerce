@@ -32,7 +32,7 @@ class Database:
         cursor = None
         try:
             cursor = connection.cursor(dictionary=True)
-            print(f"🔍 Executing query: {query}")
+            print(f" Executing query: {query}")
             print(f"   Params: {params}")
             
             cursor.execute(query, params or ())

@@ -22,7 +22,7 @@ def get_db():
     try:
         return mysql.connector.connect(**DB_CONFIG)
     except Error as e:
-        print(f"❌ Database error: {e}")
+        print(f" Database error: {e}")
         return None
 
 # Configure Flask for file uploads
@@ -139,7 +139,7 @@ def register():
         }), 201
         
     except Exception as e:
-        print(f"❌ Register error: {e}")
+        print(f" Register error: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/auth/login', methods=['POST'])
@@ -182,7 +182,7 @@ def login():
         }), 200
         
     except Exception as e:
-        print(f"❌ Login error: {e}")
+        print(f" Login error: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/auth/me', methods=['GET'])

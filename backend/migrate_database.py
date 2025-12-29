@@ -38,15 +38,15 @@ def run_migration():
         exists = cursor.fetchone()[0]
         
         if exists:
-            print("ℹ️  Column 'decline_reason' already exists. Skipping migration.")
+            print("ℹ  Column 'decline_reason' already exists. Skipping migration.")
         else:
-            print("➕ Adding 'decline_reason' column to orders table...")
+            print(" Adding 'decline_reason' column to orders table...")
             cursor.execute("""
                 ALTER TABLE orders 
                 ADD COLUMN decline_reason TEXT NULL 
                 COMMENT 'Reason provided by admin when declining an order'
             """)
-            print("✅ Column added successfully!")
+            print(" Column added successfully!")
         
         # Check if index exists
         cursor.execute("""
@@ -60,17 +60,17 @@ def run_migration():
         index_exists = cursor.fetchone()[0]
         
         if index_exists:
-            print("ℹ️  Index 'idx_orders_status' already exists. Skipping creation.")
+            print("  Index 'idx_orders_status' already exists. Skipping creation.")
         else:
-            print("➕ Adding index on status column...")
+            print(" Adding index on status column...")
             cursor.execute("CREATE INDEX idx_orders_status ON orders(status)")
-            print("✅ Index created successfully!")
+            print(" Index created successfully!")
         
         conn.commit()
         cursor.close()
         conn.close()
         
-        print("\n✅ Migration completed successfully!")
+        print("\n Migration completed successfully!")
         print("\nNew order statuses available:")
         print("  - pending")
         print("  - processing")
@@ -81,7 +81,7 @@ def run_migration():
         print("  - declined (new - with decline_reason support)")
         
     except Error as e:
-        print(f"❌ Migration failed: {e}")
+        print(f" Migration failed: {e}")
         return False
     
     return True
