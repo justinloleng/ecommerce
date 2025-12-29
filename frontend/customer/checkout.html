@@ -11,9 +11,16 @@
     />
     <style>
       .checkout-container {
-        padding: 20px;
-        max-width: 1400px;
+        padding: 20px 40px;
+        max-width: 100%;
         margin: 0 auto;
+      }
+      
+      @media (max-width: 1200px) {
+        .checkout-container {
+          max-width: 1400px;
+          padding: 20px;
+        }
       }
 
       .checkout-header {
@@ -21,16 +28,22 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 30px;
-        padding: 25px 30px;
+        padding: 30px 40px;
         background: white;
         border-radius: 15px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      }
+      
+      @media (max-width: 1200px) {
+        .checkout-header {
+          padding: 25px 30px;
+        }
       }
 
       .checkout-header h1 {
         margin: 0;
         color: #2d3748;
-        font-size: 2rem;
+        font-size: 2.5rem;
         font-weight: 700;
         display: flex;
         align-items: center;
@@ -39,6 +52,12 @@
 
       .checkout-header h1 i {
         color: #667eea;
+      }
+      
+      @media (max-width: 1200px) {
+        .checkout-header h1 {
+          font-size: 2rem;
+        }
       }
 
       .checkout-steps {

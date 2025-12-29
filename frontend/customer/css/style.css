@@ -13,40 +13,70 @@ body {
 }
 
 .container {
-  max-width: 1400px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 20px 20px;
+  padding: 0 40px 40px;
+}
+
+/* Tablet and smaller desktop - use constrained width */
+@media (max-width: 1200px) {
+  .container {
+    max-width: 1400px;
+    padding: 0 20px 20px;
+  }
 }
 
 /* Navigation */
 .navbar {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 0 30px;
+  padding: 0 40px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 70px;
+  height: 90px;
   position: sticky;
   top: 0;
   z-index: 100;
   margin-bottom: 30px;
 }
 
+/* Tablet and smaller - reduce navbar height */
+@media (max-width: 1200px) {
+  .navbar {
+    height: 70px;
+    padding: 0 30px;
+  }
+}
+
 .logo {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
   color: white;
   letter-spacing: -0.5px;
 }
 
+/* Tablet and smaller - reduce logo size */
+@media (max-width: 1200px) {
+  .logo {
+    font-size: 24px;
+  }
+}
+
 .logo i {
-  font-size: 28px;
+  font-size: 32px;
   animation: pulse 2s ease-in-out infinite;
+}
+
+/* Tablet and smaller - reduce icon size */
+@media (max-width: 1200px) {
+  .logo i {
+    font-size: 28px;
+  }
 }
 
 @keyframes pulse {
@@ -69,7 +99,7 @@ body {
 }
 
 .nav-links a {
-  padding: 10px 20px;
+  padding: 12px 24px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.1);
   color: white;
@@ -81,8 +111,16 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: 15px;
   backdrop-filter: blur(10px);
+}
+
+/* Tablet and smaller - reduce nav link size */
+@media (max-width: 1200px) {
+  .nav-links a {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
 }
 
 .nav-links a:hover {
@@ -118,12 +156,19 @@ body {
 .hero {
   text-align: center;
   margin-bottom: 40px;
-  padding: 40px 50px;
+  padding: 60px 80px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 15px;
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
   position: relative;
   overflow: hidden;
+}
+
+/* Tablet and smaller - reduce hero padding */
+@media (max-width: 1200px) {
+  .hero {
+    padding: 40px 50px;
+  }
 }
 
 .hero::before {
@@ -179,7 +224,7 @@ body {
 }
 
 .hero h1 {
-  font-size: 3rem;
+  font-size: 3.5rem;
   color: white;
   margin-bottom: 15px;
   font-weight: 700;
@@ -192,17 +237,38 @@ body {
   gap: 15px;
 }
 
+/* Tablet and smaller - reduce hero title size */
+@media (max-width: 1200px) {
+  .hero h1 {
+    font-size: 3rem;
+  }
+}
+
 .hero h1 i {
-  font-size: 2.8rem;
+  font-size: 3.2rem;
   animation: pulse 2s ease-in-out infinite;
 }
 
+/* Tablet and smaller - reduce hero icon size */
+@media (max-width: 1200px) {
+  .hero h1 i {
+    font-size: 2.8rem;
+  }
+}
+
 .hero p {
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   color: rgba(255, 255, 255, 0.95);
   position: relative;
   z-index: 1;
   font-weight: 500;
+}
+
+/* Tablet and smaller - reduce hero subtitle size */
+@media (max-width: 1200px) {
+  .hero p {
+    font-size: 1.2rem;
+  }
 }
 
 /* Forms Container */

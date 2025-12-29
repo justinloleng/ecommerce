@@ -11,19 +11,32 @@
     />
     <style>
       .confirmation-container {
-        padding: 20px;
-        max-width: 900px;
+        padding: 20px 40px;
+        max-width: 1200px;
         margin: 0 auto;
+      }
+      
+      @media (max-width: 1200px) {
+        .confirmation-container {
+          max-width: 900px;
+          padding: 20px;
+        }
       }
 
       .success-header {
         text-align: center;
-        padding: 40px 20px;
+        padding: 60px 40px;
         background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
         color: white;
         border-radius: 15px;
         margin-bottom: 30px;
         box-shadow: 0 10px 30px rgba(72, 187, 120, 0.3);
+      }
+      
+      @media (max-width: 1200px) {
+        .success-header {
+          padding: 40px 20px;
+        }
       }
 
       .success-icon {

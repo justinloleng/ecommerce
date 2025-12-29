@@ -17,7 +17,7 @@
       .user-info {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 40px;
+        padding: 60px 80px;
         border-radius: 15px;
         margin-bottom: 30px;
         display: flex;
@@ -26,6 +26,12 @@
         box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         position: relative;
         overflow: hidden;
+      }
+      
+      @media (max-width: 1200px) {
+        .user-info {
+          padding: 40px;
+        }
       }
 
       .user-info::before {
@@ -46,7 +52,7 @@
 
       .user-details h2 {
         margin: 0 0 10px 0;
-        font-size: 2rem;
+        font-size: 2.5rem;
         font-weight: 700;
         display: flex;
         align-items: center;
@@ -54,7 +60,17 @@
       }
 
       .user-details h2 i {
-        font-size: 1.8rem;
+        font-size: 2.2rem;
+      }
+      
+      @media (max-width: 1200px) {
+        .user-details h2 {
+          font-size: 2rem;
+        }
+        
+        .user-details h2 i {
+          font-size: 1.8rem;
+        }
       }
 
       .user-stats {
