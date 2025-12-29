@@ -12,7 +12,7 @@
     <style>
       .checkout-container {
         padding: 20px;
-        max-width: 1200px;
+        max-width: 1400px;
         margin: 0 auto;
       }
 
@@ -21,14 +21,24 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid #eaeaea;
+        padding: 25px 30px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
       }
 
       .checkout-header h1 {
         margin: 0;
         color: #2d3748;
         font-size: 2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .checkout-header h1 i {
+        color: #667eea;
       }
 
       .checkout-steps {
@@ -441,7 +451,7 @@
 
       <div class="checkout-container">
         <div class="checkout-header">
-          <h1>Checkout</h1>
+          <h1><i class="fas fa-credit-card"></i> Checkout</h1>
         </div>
 
         <div class="checkout-steps">
