@@ -45,6 +45,16 @@ body {
 
 .logo i {
   color: #667eea;
+  animation: subtle-pulse 3s ease-in-out infinite;
+}
+
+@keyframes subtle-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 .nav-links {
@@ -189,6 +199,13 @@ form {
   font-size: 1rem;
   transition: all 0.3s ease;
   width: 100%;
+  background: #fafafa;
+}
+
+.form-group input:hover,
+.form-group textarea:hover {
+  background: white;
+  border-color: #cbd5e0;
 }
 
 .form-group input:focus,
