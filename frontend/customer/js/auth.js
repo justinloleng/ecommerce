@@ -218,7 +218,7 @@ async function handleRegister(event) {
       }
       
       // Auto-login after successful registration - redirect based on admin status
-      const redirectUrl = result.user?.is_admin === 1 ? "admin.html" : "dashboard.html";
+      const redirectUrl = result.user?.is_admin === 1 ? "../admin/admin-panel.html" : "dashboard.html";
       
       setTimeout(() => {
         window.location.href = redirectUrl;
@@ -271,7 +271,7 @@ async function handleLogin(event) {
       localStorage.setItem("user", JSON.stringify(result.user));
 
       // Redirect admin users to admin dashboard, regular users to customer dashboard
-      const redirectUrl = result.user?.is_admin === 1 ? "admin.html" : "dashboard.html";
+      const redirectUrl = result.user?.is_admin === 1 ? "../admin/admin-panel.html" : "dashboard.html";
 
       setTimeout(() => {
         window.location.href = redirectUrl;

@@ -66,8 +66,8 @@ python -m http.server 8000
 
 ### Access the Application
 
-- **Customer Interface**: http://localhost:8000/
-- **Admin Panel**: http://localhost:8000/admin.html (requires admin account)
+- **Customer Interface**: http://localhost:8000/customer/
+- **Admin Panel**: http://localhost:8000/admin/admin-panel.html (requires admin account)
 
 ## Admin Panel
 
@@ -179,13 +179,26 @@ ecommerce/
 │   ├── migrate_database.py     # Database migration script
 │   └── requirements.txt        # Python dependencies
 ├── frontend/
-│   ├── index.html             # Login/Register page
-│   ├── dashboard.html         # User dashboard
-│   ├── products.html          # Product catalog
-│   ├── cart.html              # Shopping cart
-│   ├── orders.html            # Order history
-│   ├── admin.html             # Admin panel (NEW)
-│   └── css/                   # Stylesheets
+│   ├── customer/               # Customer-facing pages
+│   │   ├── index.html         # Login/Register page
+│   │   ├── dashboard.html     # User dashboard
+│   │   ├── products.html      # Product catalog
+│   │   ├── cart.html          # Shopping cart
+│   │   ├── orders.html        # Order history
+│   │   ├── css/               # Customer stylesheets
+│   │   └── js/                # Customer JavaScript
+│   └── admin/                 # Admin panel
+│       ├── admin-panel.html   # Admin dashboard
+│       ├── styles/            # Admin stylesheets
+│       │   ├── admin-panel.css
+│       │   └── admin-modals.css
+│       └── js/                # Admin JavaScript modules
+│           ├── admin-panel.js
+│           ├── admin-orders.js
+│           ├── admin-products.js
+│           ├── admin-categories.js
+│           ├── admin-users.js
+│           └── admin-reports.js
 ├── ADMIN_GUIDE.md             # Admin features documentation
 └── README.md                  # This file
 ```
