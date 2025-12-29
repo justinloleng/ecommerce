@@ -1,0 +1,306 @@
+/* Shared Navigation Component Styles */
+/* Modern, compact e-commerce navigation - 60px height */
+
+/* Navigation Bar - Optimized for E-commerce */
+.navbar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0 30px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  margin-bottom: 30px;
+  transition: all 0.3s ease;
+}
+
+/* Tablet - slightly reduce padding */
+@media (max-width: 992px) {
+  .navbar {
+    padding: 0 20px;
+  }
+}
+
+/* Mobile - hamburger menu layout */
+@media (max-width: 768px) {
+  .navbar {
+    height: 56px;
+    padding: 0 15px;
+  }
+}
+
+/* Logo/Brand Section */
+.navbar-brand,
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.5px;
+  text-decoration: none;
+  transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover,
+.logo:hover {
+  transform: scale(1.02);
+}
+
+.navbar-brand i,
+.logo i {
+  font-size: 24px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+}
+
+/* Brand text gradient */
+.brand-name,
+.logo span {
+  color: white; /* Fallback for browsers without background-clip support */
+  background: linear-gradient(to right, #fff, #f0f0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Mobile - smaller brand */
+@media (max-width: 768px) {
+  .navbar-brand,
+  .logo {
+    font-size: 18px;
+  }
+  
+  .navbar-brand i,
+  .logo i {
+    font-size: 20px;
+  }
+}
+
+/* Navigation Actions/Links Container */
+.navbar-actions,
+.nav-links {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Mobile - hide on small screens, show in hamburger menu */
+@media (max-width: 768px) {
+  .navbar-actions,
+  .nav-links {
+    display: none;
+  }
+  
+  .navbar-actions.mobile-menu-open,
+  .nav-links.mobile-menu-open {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 56px;
+    right: 0;
+    left: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 15px;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    animation: slideDown 0.3s ease;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Admin Info Badge */
+.admin-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+  .admin-info {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Navigation Buttons/Links */
+.nav-btn,
+.nav-links a {
+  padding: 8px 16px;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+}
+
+.nav-btn:hover,
+.nav-links a:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+.nav-links a.active {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Logout button special styling */
+.logout-btn,
+.nav-links a[href*="logout"],
+.nav-links a[id*="logout"] {
+  border-color: rgba(252, 129, 129, 0.5);
+}
+
+.logout-btn:hover,
+.nav-links a[href*="logout"]:hover,
+.nav-links a[id*="logout"]:hover {
+  background: rgba(252, 129, 129, 0.9);
+  border-color: rgba(252, 129, 129, 1);
+}
+
+/* Hide button text on small screens, show icons only */
+@media (max-width: 992px) {
+  .nav-btn-text {
+    display: none;
+  }
+  
+  .nav-btn,
+  .nav-links a {
+    padding: 8px 12px;
+  }
+}
+
+/* Show full button text in mobile menu */
+@media (max-width: 768px) {
+  .mobile-menu-open .nav-btn-text {
+    display: inline;
+  }
+  
+  .mobile-menu-open .nav-btn,
+  .mobile-menu-open .nav-links a {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 16px;
+  }
+}
+
+/* Cart Count Badge */
+.cart-count {
+  background: #fc8181;
+  color: white;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 4px;
+  display: none;
+  min-width: 18px;
+  text-align: center;
+}
+
+.cart-count:not(:empty) {
+  display: inline-block;
+}
+
+/* Mobile Menu Toggle Button (Hamburger) */
+.mobile-menu-toggle {
+  display: none;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.mobile-menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: flex;
+  }
+}
+
+/* Mobile menu close button */
+.mobile-menu-close {
+  display: none;
+}
+
+.mobile-menu-open .mobile-menu-close {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background: rgba(252, 129, 129, 0.2);
+  border: 1.5px solid rgba(252, 129, 129, 0.5);
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* Accessibility improvements */
+.navbar *:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+}
+
+/* Smooth scroll behavior when clicking nav links */
+html {
+  scroll-behavior: smooth;
+}
