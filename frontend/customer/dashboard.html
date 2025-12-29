@@ -497,7 +497,7 @@
         const cart = JSON.parse(localStorage.getItem("cart") || "[]");
         const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-        // update ug cart count
+        // update cart count
         const cartCountElements = document.querySelectorAll(".cart-count");
         cartCountElements.forEach((element) => {
           if (element) {
