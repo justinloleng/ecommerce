@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frontend Routing Tests</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .test-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    h1 {
+      color: #2d3748;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .test-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      background: #f8f9fa;
+    }
+    
+    .test-section h2 {
+      color: #4a5568;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+    }
+    
+    .test-case {
+      margin: 15px 0;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      border-left: 4px solid #cbd5e0;
+    }
+    
+    .test-case.passed {
+      border-left-color: #48bb78;
+      background: #f0fff4;
+    }
+    
+    .test-case.failed {
+      border-left-color: #fc8181;
+      background: #fff5f5;
+    }
+    
+    .test-case.running {
+      border-left-color: #fbd38d;
+      background: #fffaf0;
+    }
+    
+    .test-name {
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 5px;
+    }
+    
+    .test-result {
+      font-size: 0.9rem;
+      color: #718096;
+    }
+    
+    .test-status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-right: 10px;
+    }
+    
+    .test-status.passed {
+      background: #48bb78;
+      color: white;
+    }
+    
+    .test-status.failed {
+      background: #fc8181;
+      color: white;
+    }
+    
+    .test-status.running {
+      background: #fbd38d;
+      color: #744210;
+    }
+    
+    .summary {
+      display: flex;
+      gap: 20px;
+      margin-top: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 10px;
+    }
+    
+    .summary-item {
+      flex: 1;
+      text-align: center;
+    }
+    
+    .summary-number {
+      font-size: 2.5rem;
+      font-weight: bold;
+      display: block;
+    }
+    
+    .summary-label {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    
+    button {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      transition: transform 0.2s;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+    }
+    
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>
+      <span>🧪</span>
+      Frontend Routing Tests
+    </h1>
+    
+    <button id="runTestsBtn" onclick="runAllTests()">Run All Tests</button>
+    
+    <div class="test-section">
+      <h2>Routing Tests</h2>
+      <div id="routingTests"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>UI Element Tests</h2>
+      <div id="uiTests"></div>
+    </div>
+    
+    <div class="summary" id="summary" style="display: none;">
+      <div class="summary-item">
+        <span class="summary-number" id="totalTests">0</span>
+        <span class="summary-label">Total Tests</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-number" id="passedTests">0</span>
+        <span class="summary-label">Passed</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-number" id="failedTests">0</span>
+        <span class="summary-label">Failed</span>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const routingTestsDiv = document.getElementById('routingTests');
+    const uiTestsDiv = document.getElementById('uiTests');
+    const summaryDiv = document.getElementById('summary');
+    
+    let totalTests = 0;
+    let passedTests = 0;
+    let failedTests = 0;
+    
+    function createTestCase(name, containerId) {
+      const testCase = document.createElement('div');
+      testCase.className = 'test-case running';
+      testCase.id = `test-${name.replace(/\s+/g, '-').toLowerCase()}`;
+      testCase.innerHTML = `
+        <div class="test-name">
+          <span class="test-status running">RUNNING</span>
+          ${name}
+        </div>
+        <div class="test-result">Testing...</div>
+      `;
+      document.getElementById(containerId).appendChild(testCase);
+      return testCase;
+    }
+    
+    function updateTestCase(testCaseId, passed, message) {
+      const testCase = document.getElementById(testCaseId);
+      const status = passed ? 'passed' : 'failed';
+      testCase.className = `test-case ${status}`;
+      testCase.querySelector('.test-status').textContent = passed ? 'PASSED' : 'FAILED';
+      testCase.querySelector('.test-status').className = `test-status ${status}`;
+      testCase.querySelector('.test-result').textContent = message;
+      
+      if (passed) {
+        passedTests++;
+      } else {
+        failedTests++;
+      }
+      totalTests++;
+      updateSummary();
+    }
+    
+    function updateSummary() {
+      document.getElementById('totalTests').textContent = totalTests;
+      document.getElementById('passedTests').textContent = passedTests;
+      document.getElementById('failedTests').textContent = failedTests;
+      summaryDiv.style.display = 'flex';
+    }
+    
+    async function runAllTests() {
+      // Reset counters
+      totalTests = 0;
+      passedTests = 0;
+      failedTests = 0;
+      routingTestsDiv.innerHTML = '';
+      uiTestsDiv.innerHTML = '';
+      summaryDiv.style.display = 'none';
+      document.getElementById('runTestsBtn').disabled = true;
+      
+      // Test 1: Check root index.html exists and has redirect
+      const test1 = createTestCase('Root index.html exists', 'routingTests');
+      try {
+        const response = await fetch('/index.html');
+        if (response.ok) {
+          const html = await response.text();
+          // Check for JavaScript redirect code, not just string presence
+          const hasRedirect = html.includes('window.location.href') && 
+                            html.includes('customer/index.html') &&
+                            html.includes('<script>');
+          updateTestCase(test1.id, hasRedirect, hasRedirect 
+            ? 'Root index.html exists and contains JavaScript redirect to customer login' 
+            : 'Root index.html exists but missing proper JavaScript redirect');
+        } else {
+          updateTestCase(test1.id, false, `Failed to load: ${response.status}`);
+        }
+      } catch (error) {
+        updateTestCase(test1.id, false, `Error: ${error.message}`);
+      }
+      
+      // Test 2: Check customer index.html exists with login form
+      const test2 = createTestCase('Customer login page exists', 'routingTests');
+      try {
+        const response = await fetch('/customer/index.html');
+        if (response.ok) {
+          const html = await response.text();
+          // Parse HTML and check for actual form element
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const loginForm = doc.getElementById('loginFormElement');
+          const hasLoginForm = loginForm !== null && loginForm.tagName === 'FORM';
+          updateTestCase(test2.id, hasLoginForm, hasLoginForm 
+            ? 'Customer login page exists with login form element' 
+            : 'Customer login page exists but missing login form element');
+        } else {
+          updateTestCase(test2.id, false, `Failed to load: ${response.status}`);
+        }
+      } catch (error) {
+        updateTestCase(test2.id, false, `Error: ${error.message}`);
+      }
+      
+      // Test 3: Check admin panel exists
+      const test3 = createTestCase('Admin panel page exists', 'routingTests');
+      try {
+        const response = await fetch('/admin/admin-panel.html');
+        updateTestCase(test3.id, response.ok, response.ok 
+          ? 'Admin panel page exists' 
+          : `Failed to load: ${response.status}`);
+      } catch (error) {
+        updateTestCase(test3.id, false, `Error: ${error.message}`);
+      }
+      
+      // Test 4: Check customer CSS exists
+      const test4 = createTestCase('Customer CSS file exists', 'uiTests');
+      try {
+        const response = await fetch('/customer/css/style.css');
+        if (response.ok) {
+          const css = await response.text();
+          const hasModernStyles = css.includes('linear-gradient') && css.includes('border-radius');
+          updateTestCase(test4.id, hasModernStyles, hasModernStyles
+            ? 'Customer CSS has modern styling (gradients, rounded corners)'
+            : 'Customer CSS exists but may lack modern styling');
+        } else {
+          updateTestCase(test4.id, false, `Failed to load: ${response.status}`);
+        }
+      } catch (error) {
+        updateTestCase(test4.id, false, `Error: ${error.message}`);
+      }
+      
+      // Test 5: Check admin CSS exists
+      const test5 = createTestCase('Admin CSS file exists', 'uiTests');
+      try {
+        const response = await fetch('/admin/styles/admin-panel.css');
+        if (response.ok) {
+          const css = await response.text();
+          const hasModernStyles = css.includes('linear-gradient') && css.includes('border-radius');
+          updateTestCase(test5.id, hasModernStyles, hasModernStyles
+            ? 'Admin CSS has modern styling (gradients, rounded corners)'
+            : 'Admin CSS exists but may lack modern styling');
+        } else {
+          updateTestCase(test5.id, false, `Failed to load: ${response.status}`);
+        }
+      } catch (error) {
+        updateTestCase(test5.id, false, `Error: ${error.message}`);
+      }
+      
+      // Test 6: Check consistent color scheme
+      const test6 = createTestCase('Consistent color scheme across pages', 'uiTests');
+      try {
+        const [customerCss, adminCss] = await Promise.all([
+          fetch('/customer/css/style.css').then(r => r.ok ? r.text() : Promise.reject('Customer CSS not found')),
+          fetch('/admin/styles/admin-panel.css').then(r => r.ok ? r.text() : Promise.reject('Admin CSS not found'))
+        ]).catch(err => {
+          throw new Error(`Failed to fetch CSS files: ${err}`);
+        });
+        
+        const customerHasTheme = customerCss.includes('#667eea') || customerCss.includes('#764ba2');
+        const adminHasTheme = adminCss.includes('#667eea') || adminCss.includes('#764ba2');
+        const consistent = customerHasTheme && adminHasTheme;
+        
+        updateTestCase(test6.id, consistent, consistent
+          ? 'Both customer and admin interfaces use consistent purple/blue theme'
+          : 'Color scheme may not be consistent across interfaces');
+      } catch (error) {
+        updateTestCase(test6.id, false, `Error: ${error.message}`);
+      }
+      
+      // Test 7: Check responsive design
+      const test7 = createTestCase('Responsive design media queries', 'uiTests');
+      try {
+        const [customerCss, adminCss] = await Promise.all([
+          fetch('/customer/css/style.css').then(r => r.ok ? r.text() : Promise.reject('Customer CSS not found')),
+          fetch('/admin/styles/admin-panel.css').then(r => r.ok ? r.text() : Promise.reject('Admin CSS not found'))
+        ]).catch(err => {
+          throw new Error(`Failed to fetch CSS files: ${err}`);
+        });
+        
+        const customerResponsive = customerCss.includes('@media') && customerCss.includes('max-width');
+        const adminResponsive = adminCss.includes('@media') && adminCss.includes('max-width');
+        const responsive = customerResponsive && adminResponsive;
+        
+        updateTestCase(test7.id, responsive, responsive
+          ? 'Both interfaces have responsive design media queries'
+          : 'One or more interfaces may lack responsive design');
+      } catch (error) {
+        updateTestCase(test7.id, false, `Error: ${error.message}`);
+      }
+      
+      document.getElementById('runTestsBtn').disabled = false;
+    }
+  </script>
+</body>
+</html>

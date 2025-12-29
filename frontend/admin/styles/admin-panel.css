@@ -426,6 +426,14 @@ tbody tr:last-child td {
   font-size: 14px;
   transition: all 0.3s ease;
   font-family: inherit;
+  background: #fafafa;
+}
+
+.form-group input:hover,
+.form-group select:hover,
+.form-group textarea:hover {
+  background: white;
+  border-color: #cbd5e0;
 }
 
 .form-group textarea {
@@ -523,6 +531,25 @@ tbody tr:last-child td {
   gap: 20px;
   transition: all 0.3s ease;
   border: 1px solid #e2e8f0;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover::before {
+  opacity: 1;
 }
 
 .stat-card:hover {
@@ -540,6 +567,13 @@ tbody tr:last-child td {
   font-size: 28px;
   color: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.1) rotate(5deg);
 }
 
 .stat-icon.blue {
@@ -563,6 +597,13 @@ tbody tr:last-child td {
   font-size: 32px;
   margin: 0;
   font-weight: 700;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-card:hover .stat-info h3 {
+  transform: translateX(5px);
 }
 
 .stat-info p {
