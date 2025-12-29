@@ -66,8 +66,10 @@ python -m http.server 8000
 
 ### Access the Application
 
+- **Default Landing Page**: http://localhost:8000/ (automatically redirects to login)
 - **Customer Interface**: http://localhost:8000/customer/
 - **Admin Panel**: http://localhost:8000/admin/admin-panel.html (requires admin account)
+- **Test Suite**: http://localhost:8000/test_routing.html (frontend routing and UI tests)
 
 ## Admin Panel
 
@@ -204,6 +206,15 @@ ecommerce/
 ```
 
 ## Recent Updates
+
+### UI/UX Improvements
+- ✅ Root page now redirects to login instead of showing directory listing
+- ✅ Enhanced modern UI with smooth animations and hover effects
+- ✅ Consistent purple/blue gradient theme across all interfaces
+- ✅ Improved form input styling with subtle hover states
+- ✅ Animated stat cards in admin panel with interactive effects
+- ✅ Fully responsive design for mobile, tablet, and desktop
+- ✅ Comprehensive frontend test suite for routing and UI validation
 
 ### Order Action Buttons Fix
 - ✅ "Cancel Order" button now shows only for pending orders
