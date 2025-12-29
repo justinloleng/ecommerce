@@ -55,6 +55,7 @@ body {
 }
 
 .logo span {
+  color: #fff;
   background: linear-gradient(to right, #fff, #f0f0ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

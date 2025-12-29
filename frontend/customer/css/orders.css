@@ -208,7 +208,7 @@
 
 .order-item:hover {
   background: linear-gradient(to right, rgba(102, 126, 234, 0.03) 0%, transparent 100%);
-  transform: scale(1.001);
+  transform: scale(1.005);
 }
 
 .order-item .item-image {
