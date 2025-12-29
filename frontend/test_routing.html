@@ -339,9 +339,11 @@
       const test6 = createTestCase('Consistent color scheme across pages', 'uiTests');
       try {
         const [customerCss, adminCss] = await Promise.all([
-          fetch('/customer/css/style.css').then(r => r.text()),
-          fetch('/admin/styles/admin-panel.css').then(r => r.text())
-        ]);
+          fetch('/customer/css/style.css').then(r => r.ok ? r.text() : Promise.reject('Customer CSS not found')),
+          fetch('/admin/styles/admin-panel.css').then(r => r.ok ? r.text() : Promise.reject('Admin CSS not found'))
+        ]).catch(err => {
+          throw new Error(`Failed to fetch CSS files: ${err}`);
+        });
         
         const customerHasTheme = customerCss.includes('#667eea') || customerCss.includes('#764ba2');
         const adminHasTheme = adminCss.includes('#667eea') || adminCss.includes('#764ba2');
@@ -358,9 +360,11 @@
       const test7 = createTestCase('Responsive design media queries', 'uiTests');
       try {
         const [customerCss, adminCss] = await Promise.all([
-          fetch('/customer/css/style.css').then(r => r.text()),
-          fetch('/admin/styles/admin-panel.css').then(r => r.text())
-        ]);
+          fetch('/customer/css/style.css').then(r => r.ok ? r.text() : Promise.reject('Customer CSS not found')),
+          fetch('/admin/styles/admin-panel.css').then(r => r.ok ? r.text() : Promise.reject('Admin CSS not found'))
+        ]).catch(err => {
+          throw new Error(`Failed to fetch CSS files: ${err}`);
+        });
         
         const customerResponsive = customerCss.includes('@media') && customerCss.includes('max-width');
         const adminResponsive = adminCss.includes('@media') && adminCss.includes('max-width');
