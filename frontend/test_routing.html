@@ -249,16 +249,19 @@
       summaryDiv.style.display = 'none';
       document.getElementById('runTestsBtn').disabled = true;
       
-      // Test 1: Check root index.html exists
+      // Test 1: Check root index.html exists and has redirect
       const test1 = createTestCase('Root index.html exists', 'routingTests');
       try {
         const response = await fetch('/index.html');
         if (response.ok) {
           const html = await response.text();
-          const hasRedirect = html.includes('customer/index.html');
+          // Check for JavaScript redirect code, not just string presence
+          const hasRedirect = html.includes('window.location.href') && 
+                            html.includes('customer/index.html') &&
+                            html.includes('<script>');
           updateTestCase(test1.id, hasRedirect, hasRedirect 
-            ? 'Root index.html exists and contains redirect to customer login' 
-            : 'Root index.html exists but missing redirect');
+            ? 'Root index.html exists and contains JavaScript redirect to customer login' 
+            : 'Root index.html exists but missing proper JavaScript redirect');
         } else {
           updateTestCase(test1.id, false, `Failed to load: ${response.status}`);
         }
@@ -266,16 +269,20 @@
         updateTestCase(test1.id, false, `Error: ${error.message}`);
       }
       
-      // Test 2: Check customer index.html exists
+      // Test 2: Check customer index.html exists with login form
       const test2 = createTestCase('Customer login page exists', 'routingTests');
       try {
         const response = await fetch('/customer/index.html');
         if (response.ok) {
           const html = await response.text();
-          const hasLoginForm = html.includes('loginFormElement');
+          // Parse HTML and check for actual form element
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const loginForm = doc.getElementById('loginFormElement');
+          const hasLoginForm = loginForm !== null && loginForm.tagName === 'FORM';
           updateTestCase(test2.id, hasLoginForm, hasLoginForm 
-            ? 'Customer login page exists with login form' 
-            : 'Customer login page exists but missing login form');
+            ? 'Customer login page exists with login form element' 
+            : 'Customer login page exists but missing login form element');
         } else {
           updateTestCase(test2.id, false, `Failed to load: ${response.status}`);
         }
