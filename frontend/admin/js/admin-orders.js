@@ -226,19 +226,27 @@ async function updateOrderStatus(orderId, newStatus) {
 }
 
 function viewPaymentProof(proofUrl, filename) {
+  // Validate proofUrl
+  if (!proofUrl || typeof proofUrl !== 'string' || proofUrl.trim() === '') {
+    showToast('Invalid payment proof URL', 'error');
+    return;
+  }
+  
   // Create modal to display payment proof
   const modal = document.createElement('div');
   modal.className = 'modal active';
   modal.id = 'paymentProofModal';
   
-  const fileExtension = proofUrl.split('.').pop().toLowerCase();
+  // Safely extract file extension
+  const urlParts = proofUrl.split('.');
+  const fileExtension = urlParts.length > 1 ? urlParts[urlParts.length - 1].toLowerCase() : '';
   const isPDF = fileExtension === 'pdf';
   
   modal.innerHTML = `
     <div class="modal-overlay" onclick="closePaymentProofModal()"></div>
     <div class="modal-box" style="max-width: 800px;">
       <div class="modal-header">
-        <h3><i class="fas fa-file-invoice"></i> Payment Proof - ${filename}</h3>
+        <h3><i class="fas fa-file-invoice"></i> Payment Proof - ${filename || 'Document'}</h3>
         <button class="close-modal" onclick="closePaymentProofModal()">
           <i class="fas fa-times"></i>
         </button>

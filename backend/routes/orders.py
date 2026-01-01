@@ -291,7 +291,16 @@ def upload_payment_proof(order_id):
         
         # Validate file type
         allowed_extensions = {'jpg', 'jpeg', 'png', 'gif', 'pdf'}
-        file_ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+        
+        # Check if filename has an extension
+        if '.' not in file.filename:
+            return jsonify({'error': 'Invalid file type. Allowed: jpg, jpeg, png, gif, pdf'}), 400
+        
+        parts = file.filename.rsplit('.', 1)
+        if len(parts) < 2:
+            return jsonify({'error': 'Invalid file type. Allowed: jpg, jpeg, png, gif, pdf'}), 400
+            
+        file_ext = parts[1].lower()
         
         if file_ext not in allowed_extensions:
             return jsonify({'error': 'Invalid file type. Allowed: jpg, jpeg, png, gif, pdf'}), 400

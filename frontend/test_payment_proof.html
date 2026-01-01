@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Admin Orders View</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .order { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .payment-proof { max-width: 400px; border: 2px solid #48bb78; margin: 10px 0; }
+        .status { padding: 5px 10px; border-radius: 5px; display: inline-block; }
+        .status.processing { background: #4299e1; color: white; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; border-radius: 5px; border: none; }
+        .btn-view { background: #4299e1; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Admin Orders - Payment Proof Test</h1>
+    <div id="orders"></div>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+        
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/orders`);
+                const orders = await response.json();
+                
+                const container = document.getElementById('orders');
+                container.innerHTML = orders.map(order => `
+                    <div class="order">
+                        <h3>Order: ${order.order_number}</h3>
+                        <p><strong>Customer:</strong> ${order.first_name} ${order.last_name}</p>
+                        <p><strong>Total:</strong> $${order.total_amount.toFixed(2)}</p>
+                        <p><strong>Payment Method:</strong> ${order.payment_method}</p>
+                        <p><strong>Status:</strong> <span class="status ${order.status}">${order.status}</span></p>
+                        ${order.payment_proof_url ? `
+                            <div>
+                                <p><strong>Payment Proof:</strong> ${order.payment_proof_filename}</p>
+                                <button class="btn-view" onclick="viewProof('${order.payment_proof_url}')">View Payment Proof</button>
+                                <div id="proof-${order.id}"></div>
+                            </div>
+                        ` : order.payment_method === 'online_payment' ? 
+                            '<p style="color: orange;">⏳ Awaiting payment proof</p>' : ''}
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('orders').innerHTML = '<p style="color: red;">Error loading orders</p>';
+            }
+        }
+        
+        function viewProof(url) {
+            const fullUrl = `${API_BASE_URL.replace('/api', '')}${url}`;
+            const newWindow = window.open(fullUrl, '_blank');
+            if (!newWindow) {
+                alert('Please allow popups to view the payment proof');
+            }
+        }
+        
+        loadOrders();
+    </script>
+</body>
+</html>
