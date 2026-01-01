@@ -24,10 +24,6 @@
           <i class="fas fa-user-shield"></i>
           <span id="adminName">Admin</span>
         </div>
-        <a href="../customer/dashboard.html" class="nav-btn">
-          <i class="fas fa-home"></i>
-          <span class="nav-btn-text">Customer View</span>
-        </a>
         <button class="nav-btn logout-btn" onclick="logout()">
           <i class="fas fa-sign-out-alt"></i>
           <span class="nav-btn-text">Logout</span>
@@ -42,7 +38,9 @@
           <h1 class="dashboard-title">
             <i class="fas fa-tachometer-alt"></i> Dashboard Overview
           </h1>
-          <p class="dashboard-subtitle">Manage your e-commerce store efficiently</p>
+          <p class="dashboard-subtitle">
+            Manage your e-commerce store efficiently
+          </p>
         </div>
       </div>
 
@@ -57,19 +55,35 @@
             <i class="fas fa-shopping-cart"></i>
             <span class="tab-text">Orders</span>
           </button>
-          <button class="tab-button" onclick="switchTab('products', event)" title="Manage products">
+          <button
+            class="tab-button"
+            onclick="switchTab('products', event)"
+            title="Manage products"
+          >
             <i class="fas fa-box"></i>
             <span class="tab-text">Products</span>
           </button>
-          <button class="tab-button" onclick="switchTab('categories', event)" title="Manage categories">
+          <button
+            class="tab-button"
+            onclick="switchTab('categories', event)"
+            title="Manage categories"
+          >
             <i class="fas fa-tags"></i>
             <span class="tab-text">Categories</span>
           </button>
-          <button class="tab-button" onclick="switchTab('reports', event)" title="View sales reports">
+          <button
+            class="tab-button"
+            onclick="switchTab('reports', event)"
+            title="View sales reports"
+          >
             <i class="fas fa-chart-line"></i>
             <span class="tab-text">Reports</span>
           </button>
-          <button class="tab-button" onclick="switchTab('users', event)" title="Manage users">
+          <button
+            class="tab-button"
+            onclick="switchTab('users', event)"
+            title="Manage users"
+          >
             <i class="fas fa-users"></i>
             <span class="tab-text">Users</span>
           </button>
