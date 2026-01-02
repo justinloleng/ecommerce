@@ -203,7 +203,7 @@ document
       }
 
       const savedProduct = await response.json();
-      const savedProductId = savedProduct.product?.id || productId;
+      const savedProductId = savedProduct.product_id || productId;
 
       let uploadSucceeded = true;
       // Check if a file was selected for upload

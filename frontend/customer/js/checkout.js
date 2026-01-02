@@ -223,6 +223,9 @@ async function placeOrder() {
     if (response.ok) {
       const result = await response.json();
       
+      // Log order creation for debugging
+      console.log("Order created successfully:", result);
+      
       // If online payment, upload payment proof
       if (formData.payment_method === "online_payment") {
         const fileInput = document.getElementById("paymentProof");
@@ -231,25 +234,37 @@ async function placeOrder() {
             const paymentFormData = new FormData();
             paymentFormData.append('payment_proof', fileInput.files[0]);
             
-            const uploadResponse = await fetch(`${API_BASE_URL}/orders/${result.order.id}/payment-proof`, {
-              method: "POST",
-              credentials: "include",
-              body: paymentFormData,
-            });
-            
-            if (!uploadResponse.ok) {
-              const uploadError = await uploadResponse.json();
-              console.error("Payment proof upload error:", uploadError);
+            // Ensure order ID exists before uploading
+            if (!result.order || !result.order.id) {
+              console.error("Order ID not found in response:", result);
               showToast("Order created but payment proof upload failed. Please contact support.", "warning");
+            } else {
+              console.log(`Uploading payment proof for order ID: ${result.order.id}`);
+              
+              const uploadResponse = await fetch(`${API_BASE_URL}/orders/${result.order.id}/payment-proof`, {
+                method: "POST",
+                credentials: "include",
+                body: paymentFormData,
+              });
+              
+              if (!uploadResponse.ok) {
+                const uploadError = await uploadResponse.json();
+                console.error("Payment proof upload failed:", uploadError);
+                showToast("Order created but payment proof upload failed. Please contact support.", "warning");
+              } else {
+                const uploadResult = await uploadResponse.json();
+                console.log("Payment proof uploaded successfully:", uploadResult);
+                showToast("Order placed and payment proof uploaded successfully!", "success");
+              }
             }
           } catch (uploadError) {
             console.error("Payment proof upload error:", uploadError);
             showToast("Order created but payment proof upload failed. Please contact support.", "warning");
           }
         }
+      } else {
+        showToast("Order placed successfully!", "success");
       }
-
-      showToast("Order placed successfully!", "success");
 
       // Redirect to order confirmation page
       setTimeout(() => {

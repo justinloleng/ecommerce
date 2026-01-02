@@ -68,6 +68,10 @@ function displayOrders(orders) {
         order.status.charAt(0).toUpperCase() + order.status.slice(1)
       }</span></td>
       <td>
+        <button class="btn btn-info btn-sm" onclick="viewOrderDetails(${order.id})">
+          <i class="fas fa-info-circle"></i> View Details
+        </button>
+        <br>
         ${order.payment_method === 'online_payment' && order.payment_proof_url ? 
           `<button class="btn btn-info btn-sm" onclick="viewPaymentProof('${order.payment_proof_url}', '${order.payment_proof_filename || 'Payment Proof'}')">
             <i class="fas fa-eye"></i> View Proof
@@ -275,6 +279,184 @@ function viewPaymentProof(proofUrl, filename) {
 
 function closePaymentProofModal() {
   const modal = document.getElementById('paymentProofModal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+async function viewOrderDetails(orderId) {
+  try {
+    // Constants for order details display
+    const SHIPPING_COST = 5.00; // Standard shipping cost
+    const DESCRIPTION_TRUNCATE_LENGTH = 60;
+    
+    // Show loading toast
+    showToast('Loading order details...', 'info');
+    
+    // Fetch order details
+    const response = await fetch(`${API_BASE_URL}/orders/${orderId}`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to load order details');
+    }
+    
+    const order = await response.json();
+    console.log('Order details:', order);
+    
+    // Create modal to display order details
+    const modal = document.createElement('div');
+    modal.className = 'modal active';
+    modal.id = 'orderDetailsModal';
+    
+    // Calculate subtotal
+    let subtotal = 0;
+    if (order.items && order.items.length > 0) {
+      subtotal = order.items.reduce((sum, item) => sum + (item.price_at_time * item.quantity), 0);
+    }
+    
+    // Format items list
+    let itemsHTML = '';
+    if (order.items && order.items.length > 0) {
+      itemsHTML = order.items.map(item => `
+        <tr>
+          <td>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <img src="${API_BASE_URL}${item.image_url || '/static/uploads/products/default.jpg'}" 
+                   alt="${item.name}" 
+                   style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
+                   onerror="this.src='${API_BASE_URL}/static/uploads/products/default.jpg'">
+              <div>
+                <strong>${item.name}</strong>
+                ${item.description ? `<br><small style="color: #666;">${item.description.substring(0, DESCRIPTION_TRUNCATE_LENGTH)}...</small>` : ''}
+              </div>
+            </div>
+          </td>
+          <td style="text-align: center;">${item.quantity}</td>
+          <td style="text-align: right;">$${parseFloat(item.price_at_time).toFixed(2)}</td>
+          <td style="text-align: right;"><strong>$${(parseFloat(item.price_at_time) * item.quantity).toFixed(2)}</strong></td>
+        </tr>
+      `).join('');
+    } else {
+      itemsHTML = '<tr><td colspan="4" style="text-align: center; color: #666;">No items found</td></tr>';
+    }
+    
+    modal.innerHTML = `
+      <div class="modal-overlay" onclick="closeOrderDetailsModal()"></div>
+      <div class="modal-box" style="max-width: 900px;">
+        <div class="modal-header">
+          <h3><i class="fas fa-shopping-cart"></i> Order Details - ${order.order_number}</h3>
+          <button class="close-modal" onclick="closeOrderDetailsModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body" style="padding: 20px; max-height: 70vh; overflow-y: auto;">
+          <!-- Order Status -->
+          <div style="background: #f7fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+              <div>
+                <label style="color: #718096; font-size: 0.875rem; display: block; margin-bottom: 5px;">Status</label>
+                <span class="badge badge-${order.status}" style="font-size: 1rem;">
+                  ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                </span>
+              </div>
+              <div>
+                <label style="color: #718096; font-size: 0.875rem; display: block; margin-bottom: 5px;">Order Date</label>
+                <strong>${new Date(order.created_at).toLocaleString()}</strong>
+              </div>
+              <div>
+                <label style="color: #718096; font-size: 0.875rem; display: block; margin-bottom: 5px;">Payment Method</label>
+                <strong>${order.payment_method === 'online_payment' ? 'Online Payment' : 'Cash on Delivery'}</strong>
+              </div>
+            </div>
+            ${order.decline_reason ? `
+              <div style="margin-top: 15px; padding: 10px; background: #fff5f5; border-left: 4px solid #f56565; border-radius: 4px;">
+                <strong style="color: #c53030;">Decline Reason:</strong>
+                <p style="margin: 5px 0 0 0; color: #742a2a;">${order.decline_reason}</p>
+              </div>
+            ` : ''}
+          </div>
+          
+          <!-- Order Items -->
+          <div style="margin-bottom: 20px;">
+            <h4 style="margin-bottom: 15px; color: #2d3748;">
+              <i class="fas fa-box"></i> Order Items
+            </h4>
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="background: #edf2f7; border-bottom: 2px solid #cbd5e0;">
+                    <th style="padding: 12px; text-align: left;">Product</th>
+                    <th style="padding: 12px; text-align: center;">Quantity</th>
+                    <th style="padding: 12px; text-align: right;">Price</th>
+                    <th style="padding: 12px; text-align: right;">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${itemsHTML}
+                </tbody>
+                <tfoot>
+                  <tr style="border-top: 2px solid #cbd5e0;">
+                    <td colspan="3" style="padding: 12px; text-align: right;"><strong>Subtotal:</strong></td>
+                    <td style="padding: 12px; text-align: right;"><strong>$${subtotal.toFixed(2)}</strong></td>
+                  </tr>
+                  <tr>
+                    <td colspan="3" style="padding: 12px; text-align: right;"><strong>Shipping:</strong></td>
+                    <td style="padding: 12px; text-align: right;"><strong>$${SHIPPING_COST.toFixed(2)}</strong></td>
+                  </tr>
+                  <tr style="background: #edf2f7; font-size: 1.125rem;">
+                    <td colspan="3" style="padding: 12px; text-align: right;"><strong>Total:</strong></td>
+                    <td style="padding: 12px; text-align: right;"><strong>$${parseFloat(order.total_amount).toFixed(2)}</strong></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+          
+          <!-- Customer & Shipping Information -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <div style="background: #f7fafc; padding: 15px; border-radius: 8px;">
+              <h4 style="margin-bottom: 10px; color: #2d3748;">
+                <i class="fas fa-user"></i> Customer Information
+              </h4>
+              <p style="margin: 5px 0;"><strong>User ID:</strong> ${order.user_id}</p>
+            </div>
+            
+            <div style="background: #f7fafc; padding: 15px; border-radius: 8px;">
+              <h4 style="margin-bottom: 10px; color: #2d3748;">
+                <i class="fas fa-map-marker-alt"></i> Shipping Address
+              </h4>
+              <p style="margin: 5px 0; line-height: 1.6;">${order.shipping_address}</p>
+            </div>
+          </div>
+          
+          ${order.payment_method === 'online_payment' && order.payment_proof_url ? `
+            <div style="margin-top: 20px; background: #f7fafc; padding: 15px; border-radius: 8px;">
+              <h4 style="margin-bottom: 10px; color: #2d3748;">
+                <i class="fas fa-file-invoice"></i> Payment Proof
+              </h4>
+              <button class="btn btn-primary" onclick="viewPaymentProof('${order.payment_proof_url}', '${order.payment_proof_filename || 'Payment Proof'}')">
+                <i class="fas fa-eye"></i> View Payment Proof
+              </button>
+            </div>
+          ` : ''}
+        </div>
+        <div class="modal-footer" style="padding: 15px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
+          <button class="btn btn-secondary" onclick="closeOrderDetailsModal()">
+            <i class="fas fa-times"></i> Close
+          </button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+  } catch (error) {
+    console.error('Error loading order details:', error);
+    showToast('Failed to load order details', 'error');
+  }
+}
+
+function closeOrderDetailsModal() {
+  const modal = document.getElementById('orderDetailsModal');
   if (modal) {
     modal.remove();
   }
