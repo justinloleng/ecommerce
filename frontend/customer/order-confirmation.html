@@ -764,7 +764,10 @@
             const urlPath = order.payment_proof_url.split('?')[0]; // Remove query params
             const parts = urlPath.split('.');
             if (parts.length > 1) {
-              fileExtension = parts.pop().toLowerCase();
+              const ext = parts.pop();
+              if (ext && ext.trim()) {
+                fileExtension = ext.toLowerCase();
+              }
             }
           } catch (e) {
             console.error('Error extracting file extension:', e);
@@ -780,11 +783,13 @@
             // For PDF, hide the image and update link text
             imageLink.classList.remove('show');
             
-            // Create PDF icon safely
-            linkElement.textContent = ' Click to View PDF';
+            // Create PDF link content safely
+            linkElement.textContent = '';
             const pdfIcon = document.createElement('i');
             pdfIcon.className = 'fas fa-file-pdf';
-            linkElement.insertBefore(pdfIcon, linkElement.firstChild);
+            const pdfText = document.createTextNode(' Click to View PDF');
+            linkElement.appendChild(pdfIcon);
+            linkElement.appendChild(pdfText);
           } else {
             // For images, display wrapped in anchor tag for proper semantics
             imageLink.classList.add('show');
@@ -792,11 +797,13 @@
             imageElement.src = imageUrl;
             imageElement.alt = `Payment proof: ${order.payment_proof_filename || 'uploaded document'}`;
             
-            // Create external link icon safely
-            linkElement.textContent = ' Open in New Tab';
+            // Create image link content safely
+            linkElement.textContent = '';
             const linkIcon = document.createElement('i');
             linkIcon.className = 'fas fa-external-link-alt';
-            linkElement.insertBefore(linkIcon, linkElement.firstChild);
+            const linkText = document.createTextNode(' Open in New Tab');
+            linkElement.appendChild(linkIcon);
+            linkElement.appendChild(linkText);
           }
           
           // Set link href
