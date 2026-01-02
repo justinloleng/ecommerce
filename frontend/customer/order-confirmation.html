@@ -154,6 +154,70 @@
         margin: 5px 0 0 0;
       }
 
+      .payment-proof-section {
+        display: none;
+        background: #f7fafc;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+
+      .payment-proof-section.show {
+        display: block;
+      }
+
+      #paymentProofImageLink {
+        display: none;
+        text-decoration: none;
+      }
+
+      #paymentProofImageLink.show {
+        display: block;
+      }
+
+      .payment-proof-image {
+        max-width: 100%;
+        height: auto;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        margin-top: 15px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+
+      .payment-proof-image:hover {
+        transform: scale(1.02);
+      }
+
+      .payment-proof-image:focus {
+        outline: 3px solid #667eea;
+        outline-offset: 2px;
+      }
+
+      .payment-proof-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        margin-top: 10px;
+        transition: color 0.2s ease;
+      }
+
+      .payment-proof-link:hover {
+        color: #764ba2;
+      }
+
+      .payment-proof-filename {
+        color: #4a5568;
+        margin: 5px 0;
+      }
+
+      .payment-proof-link-container {
+        margin-top: 10px;
+      }
+
       .section-title {
         font-size: 1.3rem;
         color: #2d3748;
@@ -481,6 +545,23 @@
               </p>
             </div>
 
+            <div id="paymentProofSection" class="payment-proof-section">
+              <h3 class="section-title">
+                <i class="fas fa-file-invoice"></i>
+                Payment Proof
+              </h3>
+              <p><strong>Uploaded Document:</strong> <span id="paymentProofFilename" class="payment-proof-filename"></span></p>
+              <a id="paymentProofImageLink" href="#" target="_blank">
+                <img id="paymentProofImage" class="payment-proof-image" alt="Payment Proof" />
+              </a>
+              <div class="payment-proof-link-container">
+                <a id="paymentProofLink" class="payment-proof-link" target="_blank">
+                  <i class="fas fa-external-link-alt"></i>
+                  Open in New Tab
+                </a>
+              </div>
+            </div>
+
             <div class="order-summary">
               <div class="summary-row">
                 <span>Subtotal</span>
@@ -664,6 +745,72 @@
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(" ");
         document.getElementById("paymentMethod").textContent = paymentMethod;
+
+        // Payment proof (show only for online payment with uploaded proof)
+        const paymentProofSection = document.getElementById("paymentProofSection");
+        if (order.payment_method === 'online_payment' && order.payment_proof_url) {
+          paymentProofSection.classList.add('show');
+          
+          // Set filename with generic fallback
+          document.getElementById("paymentProofFilename").textContent = 
+            order.payment_proof_filename || 'payment_proof';
+          
+          // Build full URL for the image
+          const imageUrl = `${API_BASE_URL}${order.payment_proof_url}`;
+          
+          // Check if file is PDF - robust extension extraction with fallback
+          let fileExtension = '';
+          try {
+            const urlPath = order.payment_proof_url.split('?')[0]; // Remove query params
+            const parts = urlPath.split('.');
+            if (parts.length > 1) {
+              const ext = parts.pop();
+              if (ext && ext.trim()) {
+                fileExtension = ext.toLowerCase();
+              }
+            }
+          } catch (e) {
+            console.error('Error extracting file extension:', e);
+          }
+          const isPDF = fileExtension === 'pdf';
+          
+          // Handle image or PDF display
+          const imageElement = document.getElementById("paymentProofImage");
+          const imageLink = document.getElementById("paymentProofImageLink");
+          const linkElement = document.getElementById("paymentProofLink");
+          
+          if (isPDF) {
+            // For PDF, hide the image and update link text
+            imageLink.classList.remove('show');
+            
+            // Create PDF link content safely
+            linkElement.textContent = '';
+            const pdfIcon = document.createElement('i');
+            pdfIcon.className = 'fas fa-file-pdf';
+            const pdfText = document.createTextNode(' Click to View PDF');
+            linkElement.appendChild(pdfIcon);
+            linkElement.appendChild(pdfText);
+          } else {
+            // For images, display wrapped in anchor tag for proper semantics
+            imageLink.classList.add('show');
+            imageLink.href = imageUrl;
+            imageElement.src = imageUrl;
+            imageElement.alt = `Payment proof: ${order.payment_proof_filename || 'uploaded document'}`;
+            
+            // Create image link content safely
+            linkElement.textContent = '';
+            const linkIcon = document.createElement('i');
+            linkIcon.className = 'fas fa-external-link-alt';
+            const linkText = document.createTextNode(' Open in New Tab');
+            linkElement.appendChild(linkIcon);
+            linkElement.appendChild(linkText);
+          }
+          
+          // Set link href
+          linkElement.href = imageUrl;
+        } else {
+          paymentProofSection.classList.remove('show');
+        }
 
         // Order totals
         const subtotal = order.total_amount - 5.0; // Subtract shipping
