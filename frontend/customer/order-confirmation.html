@@ -736,9 +736,9 @@
         if (order.payment_method === 'online_payment' && order.payment_proof_url) {
           paymentProofSection.classList.add('show');
           
-          // Set filename
+          // Set filename with generic fallback
           document.getElementById("paymentProofFilename").textContent = 
-            order.payment_proof_filename || 'payment_proof.jpg';
+            order.payment_proof_filename || 'payment_proof';
           
           // Build full URL for the image
           const imageUrl = `${API_BASE_URL}${order.payment_proof_url}`;
@@ -750,11 +750,11 @@
           
           // Handle image or PDF display
           const imageElement = document.getElementById("paymentProofImage");
+          const linkElement = document.getElementById("paymentProofLink");
+          
           if (isPDF) {
-            // For PDF, hide the image and show a message
+            // For PDF, hide the image and update link text
             imageElement.style.display = 'none';
-            const linkElement = document.getElementById("paymentProofLink");
-            linkElement.textContent = 'Click to View PDF';
             linkElement.innerHTML = '<i class="fas fa-file-pdf"></i> Click to View PDF';
           } else {
             // For images, display normally
@@ -763,10 +763,11 @@
             imageElement.onclick = function() {
               window.open(imageUrl, '_blank');
             };
+            linkElement.innerHTML = '<i class="fas fa-external-link-alt"></i> Open in New Tab';
           }
           
           // Set link href
-          document.getElementById("paymentProofLink").href = imageUrl;
+          linkElement.href = imageUrl;
         } else {
           paymentProofSection.classList.remove('show');
         }
