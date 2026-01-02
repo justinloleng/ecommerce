@@ -180,6 +180,11 @@
         transform: scale(1.02);
       }
 
+      .payment-proof-image:focus {
+        outline: 3px solid #667eea;
+        outline-offset: 2px;
+      }
+
       .payment-proof-link {
         display: inline-flex;
         align-items: center;
@@ -743,8 +748,9 @@
           // Build full URL for the image
           const imageUrl = `${API_BASE_URL}${order.payment_proof_url}`;
           
-          // Check if file is PDF
-          const urlParts = order.payment_proof_url.split('.');
+          // Check if file is PDF - extract extension from URL path (before any query params)
+          const urlPath = order.payment_proof_url.split('?')[0].split('#')[0];
+          const urlParts = urlPath.split('.');
           const fileExtension = urlParts.length > 1 ? urlParts[urlParts.length - 1].toLowerCase() : '';
           const isPDF = fileExtension === 'pdf';
           
@@ -757,12 +763,26 @@
             imageElement.style.display = 'none';
             linkElement.innerHTML = '<i class="fas fa-file-pdf"></i> Click to View PDF';
           } else {
-            // For images, display normally
+            // For images, display with keyboard accessibility
             imageElement.style.display = 'block';
             imageElement.src = imageUrl;
+            imageElement.alt = `Payment proof: ${order.payment_proof_filename || 'uploaded document'}`;
+            imageElement.tabIndex = 0;
+            imageElement.role = 'button';
+            
+            // Click handler
             imageElement.onclick = function() {
               window.open(imageUrl, '_blank');
             };
+            
+            // Keyboard handler for accessibility
+            imageElement.onkeydown = function(e) {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                window.open(imageUrl, '_blank');
+              }
+            };
+            
             linkElement.innerHTML = '<i class="fas fa-external-link-alt"></i> Open in New Tab';
           }
           
