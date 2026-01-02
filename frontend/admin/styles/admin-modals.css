@@ -175,7 +175,7 @@
   transform: rotate(90deg);
 }
 
-/* Smooth scrollbar for modal body */
+
 .modal-body::-webkit-scrollbar {
   width: 8px;
 }

@@ -513,8 +513,6 @@ def get_sales_report():
         date_group, date_format = get_date_grouping(period)
         
         # Safe to use f-string here: date_group and date_format come from a validated whitelist
-        # in get_date_grouping() function, which only returns hardcoded SQL expressions.
-        # Get sales data grouped by period
         query = f"""
             SELECT 
                 {date_group} as period,
@@ -647,8 +645,6 @@ def generate_sales_report():
         date_group, date_format = get_date_grouping(period)
         
         # Safe to use f-string here: date_group and date_format come from a validated whitelist
-        # in get_date_grouping() function, which only returns hardcoded SQL expressions.
-        # Get sales data
         query = f"""
             SELECT 
                 {date_group} as period,

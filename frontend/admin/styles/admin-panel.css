@@ -18,8 +18,6 @@ body {
   padding: 0 20px 20px;
 }
 
-/* Navigation Bar - Now using shared nav-component.css */
-/* Override only if needed for admin-specific styling */
 
 /* Dashboard Header */
 .dashboard-header {

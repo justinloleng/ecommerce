@@ -24,8 +24,7 @@ def get_db():
 def get_cart():
     """Get user's cart items"""
     try:
-        # Note: For now, we'll use user_id from query param
-        # In a real app, you'd get this from session/token
+        
         user_id = request.args.get('user_id', type=int)
         
         if not user_id:

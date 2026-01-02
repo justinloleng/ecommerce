@@ -219,7 +219,7 @@ function updateOrderStats(orders) {
 }
 
 function filterAdminOrders(status, event) {
-  // Update active button styling using CSS classes
+
   document.querySelectorAll(".order-filter-btn").forEach((btn) => {
     btn.classList.remove("active");
   });
