@@ -222,6 +222,32 @@ async function placeOrder() {
 
     if (response.ok) {
       const result = await response.json();
+      
+      // If online payment, upload payment proof
+      if (formData.payment_method === "online_payment") {
+        const fileInput = document.getElementById("paymentProof");
+        if (fileInput.files.length > 0) {
+          try {
+            const paymentFormData = new FormData();
+            paymentFormData.append('payment_proof', fileInput.files[0]);
+            
+            const uploadResponse = await fetch(`${API_BASE_URL}/orders/${result.order.id}/payment-proof`, {
+              method: "POST",
+              credentials: "include",
+              body: paymentFormData,
+            });
+            
+            if (!uploadResponse.ok) {
+              const uploadError = await uploadResponse.json();
+              console.error("Payment proof upload error:", uploadError);
+              showToast("Order created but payment proof upload failed. Please contact support.", "warning");
+            }
+          } catch (uploadError) {
+            console.error("Payment proof upload error:", uploadError);
+            showToast("Order created but payment proof upload failed. Please contact support.", "warning");
+          }
+        }
+      }
 
       showToast("Order placed successfully!", "success");
 

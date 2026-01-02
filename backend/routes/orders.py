@@ -3,6 +3,8 @@ import mysql.connector
 from mysql.connector import Error
 from decimal import Decimal
 import uuid
+import os
+from werkzeug.utils import secure_filename
 
 orders_bp = Blueprint('orders', __name__)
 
@@ -148,7 +150,8 @@ def get_user_orders(user_id):
         cursor.execute("""
             SELECT o.id, o.user_id, o.order_number, o.total_amount, 
                    o.shipping_address, o.payment_method, o.status, 
-                   o.decline_reason, o.created_at, o.updated_at,
+                   o.decline_reason, o.payment_proof_url, o.payment_proof_filename,
+                   o.created_at, o.updated_at,
                    COUNT(oi.id) as item_count
             FROM orders o
             LEFT JOIN order_items oi ON o.id = oi.order_id
@@ -277,35 +280,81 @@ def update_order_status(order_id):
 def upload_payment_proof(order_id):
     """Upload payment proof for online payment"""
     try:
-        # Note: For file upload, you'd need additional handling
-        # This is a simplified version
-        data = request.get_json()
-        payment_proof_url = data.get('payment_proof_url')
+        # Check if file is in the request
+        if 'payment_proof' not in request.files:
+            return jsonify({'error': 'No file provided'}), 400
         
-        if not payment_proof_url:
-            return jsonify({'error': 'Payment proof URL required'}), 400
+        file = request.files['payment_proof']
         
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+        
+        # Validate file type
+        allowed_extensions = {'jpg', 'jpeg', 'png', 'gif', 'pdf'}
+        
+        # Check if filename has an extension
+        if '.' not in file.filename:
+            return jsonify({'error': 'Invalid file type. Allowed: jpg, jpeg, png, gif, pdf'}), 400
+        
+        parts = file.filename.rsplit('.', 1)
+        if len(parts) < 2:
+            return jsonify({'error': 'Invalid file type. Allowed: jpg, jpeg, png, gif, pdf'}), 400
+            
+        file_ext = parts[1].lower()
+        
+        if file_ext not in allowed_extensions:
+            return jsonify({'error': 'Invalid file type. Allowed: jpg, jpeg, png, gif, pdf'}), 400
+        
+        # Get the original filename and secure it
+        original_filename = secure_filename(file.filename)
+        
+        # Generate a unique filename using UUID
+        unique_filename = f"{uuid.uuid4().hex[:16]}_{original_filename}"
+        
+        # Create upload directory if it doesn't exist
+        # Use relative path from backend directory
+        upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'uploads', 'payment_proofs')
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        # Save the file
+        file_path = os.path.join(upload_dir, unique_filename)
+        file.save(file_path)
+        
+        # Store URL path in database (relative to static directory)
+        payment_proof_url = f"/static/uploads/payment_proofs/{unique_filename}"
+        
+        # Update database
         conn = get_db()
         if not conn:
+            # Clean up uploaded file if database connection fails
+            if os.path.exists(file_path):
+                os.remove(file_path)
             return jsonify({'error': 'Database connection failed'}), 500
         
         cursor = conn.cursor()
         cursor.execute("""
             UPDATE orders 
-            SET payment_proof_url = %s, status = 'processing'
+            SET payment_proof_url = %s, payment_proof_filename = %s, status = 'processing'
             WHERE id = %s AND payment_method = 'online_payment'
-        """, (payment_proof_url, order_id))
+        """, (payment_proof_url, original_filename, order_id))
         
         if cursor.rowcount == 0:
             cursor.close()
             conn.close()
+            # Clean up uploaded file if order not found
+            if os.path.exists(file_path):
+                os.remove(file_path)
             return jsonify({'error': 'Order not found or not online payment'}), 404
         
         conn.commit()
         cursor.close()
         conn.close()
         
-        return jsonify({'message': 'Payment proof uploaded'}), 200
+        return jsonify({
+            'message': 'Payment proof uploaded successfully',
+            'payment_proof_url': payment_proof_url,
+            'filename': original_filename
+        }), 200
         
     except Exception as e:
         print(f"❌ Upload payment proof error: {e}")
