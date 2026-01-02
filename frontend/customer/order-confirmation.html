@@ -166,6 +166,11 @@
         display: block;
       }
 
+      #paymentProofImageLink {
+        display: block;
+        text-decoration: none;
+      }
+
       .payment-proof-image {
         max-width: 100%;
         height: auto;
@@ -541,9 +546,10 @@
                 <i class="fas fa-file-invoice"></i>
                 Payment Proof
               </h3>
-              <p><strong>Uploaded Document:</strong></p>
-              <p id="paymentProofFilename" class="payment-proof-filename"></p>
-              <img id="paymentProofImage" class="payment-proof-image" alt="Payment Proof" />
+              <p><strong>Uploaded Document:</strong> <span id="paymentProofFilename" class="payment-proof-filename"></span></p>
+              <a id="paymentProofImageLink" href="#" target="_blank" style="display: none;">
+                <img id="paymentProofImage" class="payment-proof-image" alt="Payment Proof" />
+              </a>
               <div class="payment-proof-link-container">
                 <a id="paymentProofLink" class="payment-proof-link" target="_blank">
                   <i class="fas fa-external-link-alt"></i>
@@ -748,40 +754,25 @@
           // Build full URL for the image
           const imageUrl = `${API_BASE_URL}${order.payment_proof_url}`;
           
-          // Check if file is PDF - extract extension from URL path (before any query params)
-          const urlPath = order.payment_proof_url.split('?')[0].split('#')[0];
-          const urlParts = urlPath.split('.');
-          const fileExtension = urlParts.length > 1 ? urlParts[urlParts.length - 1].toLowerCase() : '';
+          // Check if file is PDF - simplified extension extraction
+          const fileExtension = order.payment_proof_url.split('?')[0].split('.').pop()?.toLowerCase() || '';
           const isPDF = fileExtension === 'pdf';
           
           // Handle image or PDF display
           const imageElement = document.getElementById("paymentProofImage");
+          const imageLink = document.getElementById("paymentProofImageLink");
           const linkElement = document.getElementById("paymentProofLink");
           
           if (isPDF) {
             // For PDF, hide the image and update link text
-            imageElement.style.display = 'none';
+            imageLink.style.display = 'none';
             linkElement.innerHTML = '<i class="fas fa-file-pdf"></i> Click to View PDF';
           } else {
-            // For images, display with keyboard accessibility
-            imageElement.style.display = 'block';
+            // For images, display wrapped in anchor tag for proper semantics
+            imageLink.style.display = 'block';
+            imageLink.href = imageUrl;
             imageElement.src = imageUrl;
             imageElement.alt = `Payment proof: ${order.payment_proof_filename || 'uploaded document'}`;
-            imageElement.tabIndex = 0;
-            imageElement.role = 'button';
-            
-            // Click handler
-            imageElement.onclick = function() {
-              window.open(imageUrl, '_blank');
-            };
-            
-            // Keyboard handler for accessibility
-            imageElement.onkeydown = function(e) {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                window.open(imageUrl, '_blank');
-              }
-            };
             
             linkElement.innerHTML = '<i class="fas fa-external-link-alt"></i> Open in New Tab';
           }
