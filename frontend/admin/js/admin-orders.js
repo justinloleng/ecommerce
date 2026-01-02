@@ -56,11 +56,23 @@ function displayOrders(orders) {
       </td>
       <td>${new Date(order.created_at).toLocaleDateString()}</td>
       <td>${order.item_count} item(s)</td>
-      <td><strong>$${order.total_amount.toFixed(2)}</strong></td>
+      <td>
+        <strong>$${order.total_amount.toFixed(2)}</strong>
+        ${order.payment_method === 'online_payment' && order.payment_proof_url ? 
+          `<br><small style="color: #48bb78;"><i class="fas fa-check-circle"></i> Payment proof uploaded</small>` : 
+          order.payment_method === 'online_payment' ? 
+          `<br><small style="color: #f6ad55;"><i class="fas fa-clock"></i> Awaiting payment proof</small>` : 
+          ''}
+      </td>
       <td><span class="badge badge-${order.status}">${
         order.status.charAt(0).toUpperCase() + order.status.slice(1)
       }</span></td>
       <td>
+        ${order.payment_method === 'online_payment' && order.payment_proof_url ? 
+          `<button class="btn btn-info btn-sm" onclick="viewPaymentProof('${order.payment_proof_url}', '${order.payment_proof_filename || 'Payment Proof'}')">
+            <i class="fas fa-eye"></i> View Proof
+          </button>
+          <br>` : ''}
         ${
           order.status === "pending"
             ? `
@@ -210,5 +222,60 @@ async function updateOrderStatus(orderId, newStatus) {
   } catch (error) {
     console.error("Error updating order status:", error);
     showToast("Failed to update order status", "error");
+  }
+}
+
+function viewPaymentProof(proofUrl, filename) {
+  // Validate proofUrl
+  if (!proofUrl || typeof proofUrl !== 'string' || proofUrl.trim() === '') {
+    showToast('Invalid payment proof URL', 'error');
+    return;
+  }
+  
+  // Create modal to display payment proof
+  const modal = document.createElement('div');
+  modal.className = 'modal active';
+  modal.id = 'paymentProofModal';
+  
+  // Safely extract file extension
+  const urlParts = proofUrl.split('.');
+  const fileExtension = urlParts.length > 1 ? urlParts[urlParts.length - 1].toLowerCase() : '';
+  const isPDF = fileExtension === 'pdf';
+  
+  modal.innerHTML = `
+    <div class="modal-overlay" onclick="closePaymentProofModal()"></div>
+    <div class="modal-box" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-file-invoice"></i> Payment Proof - ${filename || 'Document'}</h3>
+        <button class="close-modal" onclick="closePaymentProofModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" style="text-align: center; padding: 20px;">
+        ${isPDF ? 
+          `<iframe src="${API_BASE_URL}${proofUrl}" style="width: 100%; height: 600px; border: 1px solid #ddd;"></iframe>
+           <p style="margin-top: 10px;">
+             <a href="${API_BASE_URL}${proofUrl}" target="_blank" class="btn btn-primary">
+               <i class="fas fa-external-link-alt"></i> Open in New Tab
+             </a>
+           </p>` :
+          `<img src="${API_BASE_URL}${proofUrl}" alt="Payment Proof" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px;">
+           <p style="margin-top: 10px;">
+             <a href="${API_BASE_URL}${proofUrl}" target="_blank" class="btn btn-primary">
+               <i class="fas fa-external-link-alt"></i> Open in New Tab
+             </a>
+           </p>`
+        }
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+
+function closePaymentProofModal() {
+  const modal = document.getElementById('paymentProofModal');
+  if (modal) {
+    modal.remove();
   }
 }

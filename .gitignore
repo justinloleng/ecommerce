@@ -54,3 +54,6 @@ node_modules/
 # Uploaded files (but keep directory structure)
 backend/static/uploads/**/*
 !backend/static/uploads/**/.gitkeep
+# Test files
+frontend/test_*.html
+backend/init_database.sql
