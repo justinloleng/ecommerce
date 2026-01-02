@@ -167,7 +167,7 @@
       }
 
       #paymentProofImageLink {
-        display: block;
+        display: none;
         text-decoration: none;
       }
 
@@ -547,7 +547,7 @@
                 Payment Proof
               </h3>
               <p><strong>Uploaded Document:</strong> <span id="paymentProofFilename" class="payment-proof-filename"></span></p>
-              <a id="paymentProofImageLink" href="#" target="_blank" style="display: none;">
+              <a id="paymentProofImageLink" href="#" target="_blank">
                 <img id="paymentProofImage" class="payment-proof-image" alt="Payment Proof" />
               </a>
               <div class="payment-proof-link-container">
@@ -754,8 +754,17 @@
           // Build full URL for the image
           const imageUrl = `${API_BASE_URL}${order.payment_proof_url}`;
           
-          // Check if file is PDF - simplified extension extraction
-          const fileExtension = order.payment_proof_url.split('?')[0].split('.').pop()?.toLowerCase() || '';
+          // Check if file is PDF - robust extension extraction with fallback
+          let fileExtension = '';
+          try {
+            const urlPath = order.payment_proof_url.split('?')[0]; // Remove query params
+            const parts = urlPath.split('.');
+            if (parts.length > 1) {
+              fileExtension = parts[parts.length - 1].toLowerCase();
+            }
+          } catch (e) {
+            console.error('Error extracting file extension:', e);
+          }
           const isPDF = fileExtension === 'pdf';
           
           // Handle image or PDF display
