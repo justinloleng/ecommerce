@@ -70,8 +70,8 @@ function displayOrders(orders) {
         order.status.charAt(0).toUpperCase() + order.status.slice(1)
       }</span></td>
       <td>
-        <button class="btn btn-info btn-sm" onclick="viewOrderDetails(${order.id})">
-          <i class="fas fa-info-circle"></i> View Details
+        <button class="btn btn-primary" onclick="viewOrderDetails(${order.id})" style="margin-bottom: 10px;">
+          <i class="fas fa-eye"></i> View Details
         </button>
         <br>
         ${order.payment_method === 'online_payment' && order.payment_proof_url ? 
