@@ -154,6 +154,47 @@
         margin: 5px 0 0 0;
       }
 
+      .payment-proof-section {
+        display: none;
+        background: #f7fafc;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+
+      .payment-proof-section.show {
+        display: block;
+      }
+
+      .payment-proof-image {
+        max-width: 100%;
+        height: auto;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        margin-top: 15px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+
+      .payment-proof-image:hover {
+        transform: scale(1.02);
+      }
+
+      .payment-proof-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        margin-top: 10px;
+        transition: color 0.2s ease;
+      }
+
+      .payment-proof-link:hover {
+        color: #764ba2;
+      }
+
       .section-title {
         font-size: 1.3rem;
         color: #2d3748;
@@ -481,6 +522,22 @@
               </p>
             </div>
 
+            <div id="paymentProofSection" class="payment-proof-section">
+              <h3 class="section-title">
+                <i class="fas fa-file-invoice"></i>
+                Payment Proof
+              </h3>
+              <p><strong>Uploaded Document:</strong></p>
+              <p id="paymentProofFilename" style="color: #4a5568; margin: 5px 0;"></p>
+              <img id="paymentProofImage" class="payment-proof-image" alt="Payment Proof" />
+              <div style="margin-top: 10px;">
+                <a id="paymentProofLink" class="payment-proof-link" target="_blank">
+                  <i class="fas fa-external-link-alt"></i>
+                  Open in New Tab
+                </a>
+              </div>
+            </div>
+
             <div class="order-summary">
               <div class="summary-row">
                 <span>Subtotal</span>
@@ -664,6 +721,31 @@
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(" ");
         document.getElementById("paymentMethod").textContent = paymentMethod;
+
+        // Payment proof (show only for online payment with uploaded proof)
+        const paymentProofSection = document.getElementById("paymentProofSection");
+        if (order.payment_method === 'online_payment' && order.payment_proof_url) {
+          paymentProofSection.classList.add('show');
+          
+          // Set filename
+          document.getElementById("paymentProofFilename").textContent = 
+            order.payment_proof_filename || 'payment_proof.jpg';
+          
+          // Build full URL for the image
+          const imageUrl = `${API_BASE_URL}${order.payment_proof_url}`;
+          
+          // Set image source
+          const imageElement = document.getElementById("paymentProofImage");
+          imageElement.src = imageUrl;
+          imageElement.onclick = function() {
+            window.open(imageUrl, '_blank');
+          };
+          
+          // Set link href
+          document.getElementById("paymentProofLink").href = imageUrl;
+        } else {
+          paymentProofSection.classList.remove('show');
+        }
 
         // Order totals
         const subtotal = order.total_amount - 5.0; // Subtract shipping
