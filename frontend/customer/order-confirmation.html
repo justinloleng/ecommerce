@@ -743,12 +743,27 @@
           // Build full URL for the image
           const imageUrl = `${API_BASE_URL}${order.payment_proof_url}`;
           
-          // Set image source
+          // Check if file is PDF
+          const urlParts = order.payment_proof_url.split('.');
+          const fileExtension = urlParts.length > 1 ? urlParts[urlParts.length - 1].toLowerCase() : '';
+          const isPDF = fileExtension === 'pdf';
+          
+          // Handle image or PDF display
           const imageElement = document.getElementById("paymentProofImage");
-          imageElement.src = imageUrl;
-          imageElement.onclick = function() {
-            window.open(imageUrl, '_blank');
-          };
+          if (isPDF) {
+            // For PDF, hide the image and show a message
+            imageElement.style.display = 'none';
+            const linkElement = document.getElementById("paymentProofLink");
+            linkElement.textContent = 'Click to View PDF';
+            linkElement.innerHTML = '<i class="fas fa-file-pdf"></i> Click to View PDF';
+          } else {
+            // For images, display normally
+            imageElement.style.display = 'block';
+            imageElement.src = imageUrl;
+            imageElement.onclick = function() {
+              window.open(imageUrl, '_blank');
+            };
+          }
           
           // Set link href
           document.getElementById("paymentProofLink").href = imageUrl;
