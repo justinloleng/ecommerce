@@ -755,8 +755,9 @@
           document.getElementById("paymentProofFilename").textContent = 
             order.payment_proof_filename || 'payment_proof';
           
-          // Build full URL for the image
-          const imageUrl = `${API_BASE_URL}${order.payment_proof_url}`;
+          // Build full URL for the image (static files are served from root, not /api)
+          const STATIC_BASE_URL = API_BASE_URL.replace('/api', '');
+          const imageUrl = `${STATIC_BASE_URL}${order.payment_proof_url}`;
           
           // Check if file is PDF - robust extension extraction with fallback
           let fileExtension = '';

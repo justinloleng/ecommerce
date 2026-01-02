@@ -1,4 +1,6 @@
 // Orders Management JavaScript
+// Create base URL for static files (without /api suffix)
+const STATIC_BASE_URL = API_BASE_URL.replace('/api', '');
 let currentOrders = [];
 
 async function loadOrders() {
@@ -257,15 +259,15 @@ function viewPaymentProof(proofUrl, filename) {
       </div>
       <div class="modal-body" style="text-align: center; padding: 20px;">
         ${isPDF ? 
-          `<iframe src="${API_BASE_URL}${proofUrl}" style="width: 100%; height: 600px; border: 1px solid #ddd;"></iframe>
+          `<iframe src="${STATIC_BASE_URL}${proofUrl}" style="width: 100%; height: 600px; border: 1px solid #ddd;"></iframe>
            <p style="margin-top: 10px;">
-             <a href="${API_BASE_URL}${proofUrl}" target="_blank" class="btn btn-primary">
+             <a href="${STATIC_BASE_URL}${proofUrl}" target="_blank" class="btn btn-primary">
                <i class="fas fa-external-link-alt"></i> Open in New Tab
              </a>
            </p>` :
-          `<img src="${API_BASE_URL}${proofUrl}" alt="Payment Proof" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px;">
+          `<img src="${STATIC_BASE_URL}${proofUrl}" alt="Payment Proof" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px;">
            <p style="margin-top: 10px;">
-             <a href="${API_BASE_URL}${proofUrl}" target="_blank" class="btn btn-primary">
+             <a href="${STATIC_BASE_URL}${proofUrl}" target="_blank" class="btn btn-primary">
                <i class="fas fa-external-link-alt"></i> Open in New Tab
              </a>
            </p>`
@@ -321,10 +323,10 @@ async function viewOrderDetails(orderId) {
         <tr>
           <td>
             <div style="display: flex; align-items: center; gap: 10px;">
-              <img src="${API_BASE_URL}${item.image_url || '/static/uploads/products/default.jpg'}" 
+              <img src="${STATIC_BASE_URL}${item.image_url || '/static/uploads/products/default.jpg'}" 
                    alt="${item.name}" 
                    style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
-                   onerror="this.src='${API_BASE_URL}/static/uploads/products/default.jpg'">
+                   onerror="this.src='${STATIC_BASE_URL}/static/uploads/products/default.jpg'">
               <div>
                 <strong>${item.name}</strong>
                 ${item.description ? `<br><small style="color: #666;">${item.description.substring(0, DESCRIPTION_TRUNCATE_LENGTH)}...</small>` : ''}
