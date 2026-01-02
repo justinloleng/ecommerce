@@ -286,6 +286,10 @@ function closePaymentProofModal() {
 
 async function viewOrderDetails(orderId) {
   try {
+    // Constants for order details display
+    const SHIPPING_COST = 5.00; // Standard shipping cost
+    const DESCRIPTION_TRUNCATE_LENGTH = 60;
+    
     // Show loading toast
     showToast('Loading order details...', 'info');
     
@@ -320,10 +324,10 @@ async function viewOrderDetails(orderId) {
               <img src="${API_BASE_URL}${item.image_url || '/static/uploads/products/default.jpg'}" 
                    alt="${item.name}" 
                    style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"
-                   onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'">
+                   onerror="this.src='${API_BASE_URL}/static/uploads/products/default.jpg'">
               <div>
                 <strong>${item.name}</strong>
-                ${item.description ? `<br><small style="color: #666;">${item.description.substring(0, 60)}...</small>` : ''}
+                ${item.description ? `<br><small style="color: #666;">${item.description.substring(0, DESCRIPTION_TRUNCATE_LENGTH)}...</small>` : ''}
               </div>
             </div>
           </td>
@@ -397,7 +401,7 @@ async function viewOrderDetails(orderId) {
                   </tr>
                   <tr>
                     <td colspan="3" style="padding: 12px; text-align: right;"><strong>Shipping:</strong></td>
-                    <td style="padding: 12px; text-align: right;"><strong>$5.00</strong></td>
+                    <td style="padding: 12px; text-align: right;"><strong>$${SHIPPING_COST.toFixed(2)}</strong></td>
                   </tr>
                   <tr style="background: #edf2f7; font-size: 1.125rem;">
                     <td colspan="3" style="padding: 12px; text-align: right;"><strong>Total:</strong></td>
