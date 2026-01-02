@@ -171,6 +171,10 @@
         text-decoration: none;
       }
 
+      #paymentProofImageLink.show {
+        display: block;
+      }
+
       .payment-proof-image {
         max-width: 100%;
         height: auto;
@@ -760,7 +764,7 @@
             const urlPath = order.payment_proof_url.split('?')[0]; // Remove query params
             const parts = urlPath.split('.');
             if (parts.length > 1) {
-              fileExtension = parts[parts.length - 1].toLowerCase();
+              fileExtension = parts.pop().toLowerCase();
             }
           } catch (e) {
             console.error('Error extracting file extension:', e);
@@ -774,16 +778,25 @@
           
           if (isPDF) {
             // For PDF, hide the image and update link text
-            imageLink.style.display = 'none';
-            linkElement.innerHTML = '<i class="fas fa-file-pdf"></i> Click to View PDF';
+            imageLink.classList.remove('show');
+            
+            // Create PDF icon safely
+            linkElement.textContent = ' Click to View PDF';
+            const pdfIcon = document.createElement('i');
+            pdfIcon.className = 'fas fa-file-pdf';
+            linkElement.insertBefore(pdfIcon, linkElement.firstChild);
           } else {
             // For images, display wrapped in anchor tag for proper semantics
-            imageLink.style.display = 'block';
+            imageLink.classList.add('show');
             imageLink.href = imageUrl;
             imageElement.src = imageUrl;
             imageElement.alt = `Payment proof: ${order.payment_proof_filename || 'uploaded document'}`;
             
-            linkElement.innerHTML = '<i class="fas fa-external-link-alt"></i> Open in New Tab';
+            // Create external link icon safely
+            linkElement.textContent = ' Open in New Tab';
+            const linkIcon = document.createElement('i');
+            linkIcon.className = 'fas fa-external-link-alt';
+            linkElement.insertBefore(linkIcon, linkElement.firstChild);
           }
           
           // Set link href
