@@ -31,20 +31,23 @@ A full-featured e-commerce platform with customer and admin interfaces.
 
 ### Database Setup
 
-1. Create the MySQL database:
-```sql
-CREATE DATABASE ecommerce_db;
+1. Create the MySQL database and tables using the schema file:
+```bash
+mysql -u root -p < database/schema.sql
 ```
 
-2. Run the database migration to add new features:
+This will create the database and all required tables:
+- `users` - User accounts and authentication
+- `categories` - Product categories
+- `products` - Product catalog
+- `cart` - Shopping cart items
+- `orders` - Customer orders
+- `order_items` - Individual items in each order
+
+2. (Optional) Run the database migration to add new features:
 ```bash
 cd backend
 python migrate_database.py
-```
-
-Or manually run the SQL script:
-```bash
-mysql -u root -p ecommerce_db < migration_add_decline_reason.sql
 ```
 
 ### Backend
