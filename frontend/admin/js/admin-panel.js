@@ -86,7 +86,7 @@ function logout() {
 // ========== ORDER MANAGEMENT FUNCTIONS ==========
 async function loadOrders() {
   try {
-    // Show loading state
+    // Show loading orders
     const tbody = document.getElementById("ordersTableBody");
     tbody.innerHTML = `
       <tr><td colspan="7" class="empty-state">
