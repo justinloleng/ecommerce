@@ -44,8 +44,6 @@ def get_date_grouping(period):
         'monthly': ("DATE_FORMAT(o.created_at, '%Y-%m')", "%Y-%m")
     }
     
-    # Return the hardcoded values for the given period
-    # If period is not in whitelist, default to daily
     return period_config.get(period, period_config['daily'])
 
 # ========== ADMIN ORDER ENDPOINTS ==========
@@ -59,7 +57,7 @@ def get_all_orders():
         
         cursor = conn.cursor(dictionary=True)
         
-        # FIXED: Calculate total quantity, not just row count
+        # Ito Calculate ng total quantity, tas row count
         cursor.execute("""
             SELECT 
                 o.*, 
@@ -95,7 +93,7 @@ def get_all_orders():
             for item in items:
                 if 'price_at_time' in item and isinstance(item['price_at_time'], Decimal):
                     item['price_at_time'] = float(item['price_at_time'])
-                # Ensure quantity is integer
+                    
                 if 'quantity' in item:
                     item['quantity'] = int(item['quantity'])
             
