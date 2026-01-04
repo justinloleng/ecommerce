@@ -44,7 +44,6 @@ def get_date_grouping(period):
         'monthly': ("DATE_FORMAT(o.created_at, '%Y-%m')", "%Y-%m")
     }
     
-    # Return the hardcoded values for the given period
     # If period is not in whitelist, default to daily
     return period_config.get(period, period_config['daily'])
 
@@ -293,9 +292,8 @@ def update_product(product_id):
             return jsonify({'error': 'No fields to update'}), 400
         
         params.append(product_id)
-        # Safe to use f-string here: update_fields list is built from a validated whitelist of field names above.
-        # Each field name (name, description, price, category_id, stock_quantity, image_url, is_active) is hardcoded
-        # in the if statements, so no user input can inject SQL.
+        
+        # Dito Safe to use f-string here ng update_fields list is built from a validated whitelist of field names above.
         query = f"UPDATE products SET {', '.join(update_fields)} WHERE id = %s"
         
         cursor.execute(query, params)
@@ -408,8 +406,7 @@ def update_category(category_id):
             return jsonify({'error': 'No fields to update'}), 400
         
         params.append(category_id)
-        # Safe to use f-string here: update_fields list is built from a validated whitelist of field names above.
-        # Each field name (name, description) is hardcoded in the if statements, so no user input can inject SQL.
+        # Dito Safe to use f-string here ng update_fields list is built from a validated whitelist of field names above.
         query = f"UPDATE categories SET {', '.join(update_fields)} WHERE id = %s"
         
         cursor.execute(query, params)
@@ -497,9 +494,7 @@ def get_sales_report():
         # Get date grouping configuration from helper function (prevents SQL injection)
         date_group, date_format = get_date_grouping(period)
         
-        # Safe to use f-string here: date_group and date_format come from a validated whitelist
-        # in get_date_grouping() function, which only returns hardcoded SQL expressions.
-        # Get sales data grouped by period
+        # Dito rin Safe to use f-string here: date_group and date_format come from a validated whitelist
         query = f"""
             SELECT 
                 {date_group} as period,
@@ -631,9 +626,7 @@ def generate_sales_report():
         # Get date grouping configuration from helper function (prevents SQL injection)
         date_group, date_format = get_date_grouping(period)
         
-        # Safe to use f-string here: date_group and date_format come from a validated whitelist
-        # in get_date_grouping() function, which only returns hardcoded SQL expressions.
-        # Get sales data
+        # Dito rin Safe to use f-string here: date_group and date_format come from a validated whitelist
         query = f"""
             SELECT 
                 {date_group} as period,
