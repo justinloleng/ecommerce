@@ -138,7 +138,19 @@ function displayOrders(orders) {
         <small style="color: #666;">${order.email}</small>
       </td>
       <td>${new Date(order.created_at).toLocaleDateString()}</td>
-      <td>${order.item_count} item(s)</td>
+      <td>
+        <!-- FIXED: Display total quantity instead of item count -->
+        <strong>${order.total_quantity || 0} item(s)</strong>
+        ${
+          order.items && order.items.length > 0
+            ? `<br><small style="color: #666; font-size: 0.85em;">
+                ${order.items
+                  .map((item) => `${item.quantity || 1}x ${item.name}`)
+                  .join(", ")}
+               </small>`
+            : ""
+        }
+      </td>
       <td>
         <strong>$${order.total_amount.toFixed(2)}</strong>
         ${
@@ -153,14 +165,12 @@ function displayOrders(orders) {
         order.status.charAt(0).toUpperCase() + order.status.slice(1)
       }</span></td>
       <td>
-        <!-- Always show View Details button at the top -->
         <button class="btn btn-primary btn-sm btn-block" onclick="viewOrderDetails(${
           order.id
         })">
           <i class="fas fa-eye"></i> Details
         </button>
         
-        <!-- Status-specific action buttons -->
         ${
           order.status === "pending"
             ? `
@@ -193,6 +203,7 @@ function displayOrders(orders) {
     )
     .join("");
 }
+
 function updateOrderStats(orders) {
   const pending = orders.filter((o) => o.status === "pending").length;
   const processing = orders.filter((o) => o.status === "processing").length;

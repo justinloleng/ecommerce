@@ -58,14 +58,17 @@ def get_all_orders():
         
         cursor = conn.cursor(dictionary=True)
         
+        # FIXED: Calculate total quantity, not just row count
         cursor.execute("""
-            SELECT o.*, 
-                   u.first_name, u.last_name, u.email,
-                   COUNT(oi.id) as item_count
+            SELECT 
+                o.*, 
+                u.first_name, 
+                u.last_name, 
+                u.email,
+                (SELECT SUM(quantity) FROM order_items WHERE order_id = o.id) as total_quantity,
+                (SELECT COUNT(*) FROM order_items WHERE order_id = o.id) as item_count
             FROM orders o
             LEFT JOIN users u ON o.user_id = u.id
-            LEFT JOIN order_items oi ON o.id = oi.order_id
-            GROUP BY o.id
             ORDER BY o.created_at DESC
         """)
         
@@ -74,7 +77,12 @@ def get_all_orders():
         # Get order items for each order
         for order in orders:
             cursor.execute("""
-                SELECT oi.*, p.name, p.image_url
+                SELECT 
+                    oi.*, 
+                    p.name, 
+                    p.image_url,
+                    p.description,
+                    oi.quantity  -- Make sure to get quantity from order_items
                 FROM order_items oi
                 JOIN products p ON oi.product_id = p.id
                 WHERE oi.order_id = %s
@@ -86,16 +94,23 @@ def get_all_orders():
             for item in items:
                 if 'price_at_time' in item and isinstance(item['price_at_time'], Decimal):
                     item['price_at_time'] = float(item['price_at_time'])
+                # Ensure quantity is integer
+                if 'quantity' in item:
+                    item['quantity'] = int(item['quantity'])
             
             order['items'] = items
         
         cursor.close()
         conn.close()
         
-        # Convert Decimal to float
+        # Convert Decimal to float and ensure integer counts
         for order in orders:
             if 'total_amount' in order and isinstance(order['total_amount'], Decimal):
                 order['total_amount'] = float(order['total_amount'])
+            if 'total_quantity' in order:
+                order['total_quantity'] = int(order['total_quantity']) if order['total_quantity'] else 0
+            if 'item_count' in order:
+                order['item_count'] = int(order['item_count']) if order['item_count'] else 0
         
         return jsonify(orders), 200
         
