@@ -1190,8 +1190,9 @@ def upload_product_image(product_id):
         # Save file
         file.save(file_path)
         
-        # Generate URL path
-        image_url = f"/static/uploads/products/{unique_filename}"
+        # Generate absolute URL path using request host
+        base_url = request.host_url.rstrip('/')
+        image_url = f"{base_url}/static/uploads/products/{unique_filename}"
         
         # Update product in database
         conn = get_db()

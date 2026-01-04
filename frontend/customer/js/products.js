@@ -1,5 +1,6 @@
 // Configuration
 
+const STATIC_BASE = (window.API_BASE_URL || "").replace("/api", "");
 let currentPage = 1;
 let currentCategory = "all";
 let currentSearch = "";
@@ -288,12 +289,12 @@ function displayProducts(products) {
 
     const productCard = document.createElement("div");
     productCard.className = "product-card";
+    const imgUrl = product.image_url
+      ? (product.image_url.startsWith("/") ? `${STATIC_BASE}${product.image_url}` : product.image_url)
+      : "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400";
     productCard.innerHTML = `
             <div class="product-image">
-                <img src="${
-                  product.image_url ||
-                  "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400"
-                }" 
+                <img src="${imgUrl}" 
                      alt="${product.name}" 
                      onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'">
             </div>
@@ -430,13 +431,14 @@ async function viewProductDetails(productId) {
         ? "Low Stock"
         : "Out of Stock";
 
+    const detailImgUrl = product.image_url
+      ? (product.image_url.startsWith("/") ? `${STATIC_BASE}${product.image_url}` : product.image_url)
+      : "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800";
+
     productDetailContent.innerHTML = `
             <div style="display: flex; gap: 40px; padding: 20px;">
                 <div style="flex: 1;">
-                    <img src="${
-                      product.image_url ||
-                      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800"
-                    }" 
+                    <img src="${detailImgUrl}" 
                          alt="${product.name}" 
                          style="width: 100%; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);"
                          onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800'">
