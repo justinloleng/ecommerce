@@ -1,8 +1,3 @@
-"""
-Fixed admin routes module with improved error handling and proper file upload management.
-Handles product image uploads to static/uploads/products directory with correct URL generation.
-"""
-
 import os
 import uuid
 from datetime import datetime
