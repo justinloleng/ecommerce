@@ -24,8 +24,6 @@ def get_db():
 def get_cart():
     """Get user's cart items"""
     try:
-        # Note: For now, we'll use user_id from query param
-        # In a real app, you'd get this from session/token
         user_id = request.args.get('user_id', type=int)
         
         if not user_id:
@@ -40,7 +38,8 @@ def get_cart():
         # Get cart items with product details
         cursor.execute("""
             SELECT c.*, p.name, p.price, p.image_url, p.stock_quantity,
-                   (p.price * c.quantity) as item_total
+                   (p.price * c.quantity) as item_total,
+                   c.quantity > p.stock_quantity as exceeds_stock
             FROM cart c
             JOIN products p ON c.product_id = p.id
             WHERE c.user_id = %s
@@ -69,6 +68,8 @@ def get_cart():
                 item['price'] = float(item['price'])
             if 'item_total' in item and isinstance(item['item_total'], Decimal):
                 item['item_total'] = float(item['item_total'])
+            if 'stock_quantity' in item and isinstance(item['stock_quantity'], Decimal):
+                item['stock_quantity'] = int(item['stock_quantity'])
         
         return jsonify({
             'items': cart_items,
@@ -112,24 +113,25 @@ def add_to_cart():
                       (user_id, product_id))
         existing_item = cursor.fetchone()
         
+        new_quantity = quantity
+        if existing_item:
+            new_quantity = existing_item['quantity'] + quantity
+        
+        # Check stock availability
+        if new_quantity > product['stock_quantity']:
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'error': f'Not enough stock available. Maximum: {product["stock_quantity"]}'
+            }), 400
+        
         if existing_item:
             # Update quantity
-            new_quantity = existing_item['quantity'] + quantity
-            if new_quantity > product['stock_quantity']:
-                cursor.close()
-                conn.close()
-                return jsonify({'error': 'Not enough stock available'}), 400
-            
             cursor.execute("UPDATE cart SET quantity = %s WHERE id = %s", 
                           (new_quantity, existing_item['id']))
             message = 'Cart updated'
         else:
             # Add new item
-            if quantity > product['stock_quantity']:
-                cursor.close()
-                conn.close()
-                return jsonify({'error': 'Not enough stock available'}), 400
-            
             cursor.execute("INSERT INTO cart (user_id, product_id, quantity) VALUES (%s, %s, %s)",
                           (user_id, product_id, quantity))
             message = 'Item added to cart'
@@ -175,17 +177,19 @@ def update_cart_item(item_id):
             conn.close()
             return jsonify({'error': 'Cart item not found'}), 404
         
+        # Check stock availability
+        if quantity > cart_item['stock_quantity']:
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'error': f'Not enough stock available. Maximum: {cart_item["stock_quantity"]}'
+            }), 400
+        
         if quantity == 0:
             # Remove item
             cursor.execute("DELETE FROM cart WHERE id = %s", (item_id,))
             message = 'Item removed from cart'
         else:
-            # Check stock
-            if quantity > cart_item['stock_quantity']:
-                cursor.close()
-                conn.close()
-                return jsonify({'error': 'Not enough stock available'}), 400
-            
             cursor.execute("UPDATE cart SET quantity = %s WHERE id = %s", (quantity, item_id))
             message = 'Cart updated'
         
@@ -197,6 +201,52 @@ def update_cart_item(item_id):
         
     except Exception as e:
         print(f"❌ Update cart error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@cart_bp.route('/validate-stock', methods=['GET'])
+def validate_cart_stock():
+    """Validate all cart items have sufficient stock before checkout"""
+    try:
+        user_id = request.args.get('user_id', type=int)
+        
+        if not user_id:
+            return jsonify({'error': 'User ID required'}), 400
+        
+        conn = get_db()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+        
+        cursor = conn.cursor(dictionary=True)
+        
+        # Check for items with insufficient stock
+        cursor.execute("""
+            SELECT p.name, c.quantity, p.stock_quantity
+            FROM cart c
+            JOIN products p ON c.product_id = p.id
+            WHERE c.user_id = %s 
+            AND c.quantity > p.stock_quantity
+        """, (user_id,))
+        
+        out_of_stock_items = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        if out_of_stock_items:
+            item_names = [item['name'] for item in out_of_stock_items]
+            return jsonify({
+                'valid': False,
+                'message': f'Insufficient stock for: {", ".join(item_names)}',
+                'out_of_stock_items': out_of_stock_items
+            }), 200
+        
+        return jsonify({
+            'valid': True,
+            'message': 'All items have sufficient stock'
+        }), 200
+        
+    except Exception as e:
+        print(f"❌ Validate stock error: {e}")
         return jsonify({'error': str(e)}), 500
 
 @cart_bp.route('/remove/<int:item_id>', methods=['DELETE'])

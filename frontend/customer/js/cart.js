@@ -17,15 +17,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function setupNavigation() {
   // Show admin link if user is admin
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(localStorage.getItem("user"));
   if (user && user.is_admin === 1) {
-    const adminLink = document.getElementById('adminDashboardLink');
+    const adminLink = document.getElementById("adminDashboardLink");
     if (adminLink) {
-      adminLink.style.display = 'block';
-      adminLink.href = '../admin/admin-panel.html';
+      adminLink.style.display = "block";
+      adminLink.href = "../admin/admin-panel.html";
     }
   }
-  
+
   // Logout
   document.getElementById("logoutBtn").addEventListener("click", function (e) {
     e.preventDefault();
@@ -114,60 +114,123 @@ function displayCartItems(cartData) {
 
   let itemsHTML = "";
 
+  cartItemsContainer.innerHTML = ""; // Clear existing items
+
   cartData.items.forEach((item) => {
     const itemTotal = (item.price * item.quantity).toFixed(2);
+    const maxQuantity = item.stock_quantity || 0;
+    const isAtMaxStock = item.quantity >= maxQuantity;
 
-    itemsHTML += `
-            <div class="cart-item" data-item-id="${item.id}">
-                <div class="item-image">
-                    <img src="${
-                      item.image_url ||
-                      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400"
-                    }" 
-                         alt="${item.name}"
-                         onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'">
-                </div>
-                <div class="item-details">
-                    <h3 class="item-name">${item.name}</h3>
-                    <span class="item-category">${
-                      item.category_name || "Uncategorized"
-                    }</span>
-                    <div class="item-price">$${item.price.toFixed(2)}</div>
-                    <div class="item-actions">
-                        <div class="quantity-controls">
-                            <button class="quantity-btn" onclick="updateQuantity(${
-                              item.id
-                            }, ${item.quantity - 1})">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <input type="text" class="quantity-input" value="${
-                              item.quantity
-                            }" 
-                                   data-item-id="${item.id}"
-                                   onchange="updateQuantityFromInput(${
-                                     item.id
-                                   }, this.value)">
-                            <button class="quantity-btn" onclick="updateQuantity(${
-                              item.id
-                            }, ${item.quantity + 1})">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <button class="remove-item" onclick="removeFromCart(${
-                          item.id
-                        })">
-                            <i class="fas fa-trash"></i> Remove
-                        </button>
-                    </div>
-                </div>
-                <div class="item-total">
-                    $${itemTotal}
-                </div>
-            </div>
-        `;
+    const cartItem = document.createElement("div");
+    cartItem.className = "cart-item";
+    cartItem.dataset.itemId = item.id;
+    cartItem.innerHTML = `
+      <div class="item-image">
+        <img src="${
+          item.image_url ||
+          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400"
+        }" 
+             alt="${item.name}"
+             onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'">
+      </div>
+      <div class="item-details">
+        <h3 class="item-name">${item.name}</h3>
+        <span class="item-category">${
+          item.category_name || "Uncategorized"
+        }</span>
+        <div class="item-price">$${item.price.toFixed(2)}</div>
+        
+        ${
+          maxQuantity > 0
+            ? `
+        <div class="stock-info">
+          <small style="color: #718096;">
+            <i class="fas fa-box"></i> Available: ${maxQuantity}
+          </small>
+        </div>
+        `
+            : ""
+        }
+        
+        <div class="item-actions">
+          <div class="quantity-controls">
+            <button class="quantity-btn minus-btn" data-item-id="${item.id}">
+              <i class="fas fa-minus"></i>
+            </button>
+            <input type="text" class="quantity-input" value="${item.quantity}" 
+                   data-item-id="${item.id}">
+            <button class="quantity-btn plus-btn" data-item-id="${item.id}" ${
+      isAtMaxStock ? "disabled" : ""
+    }>
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+          ${
+            isAtMaxStock
+              ? `
+          <div class="stock-warning" style="color: #e53e3e; font-size: 0.9rem; margin-top: 5px;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <small>Maximum stock reached</small>
+          </div>
+          `
+              : ""
+          }
+          <button class="remove-item" data-item-id="${item.id}">
+            <i class="fas fa-trash"></i> Remove
+          </button>
+        </div>
+      </div>
+      <div class="item-total">
+        $${itemTotal}
+      </div>
+    `;
+
+    cartItemsContainer.appendChild(cartItem);
   });
 
-  cartItemsContainer.innerHTML = itemsHTML;
+  // Add event listeners after rendering
+  setTimeout(() => {
+    document.querySelectorAll(".minus-btn").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const itemId = parseInt(this.dataset.itemId);
+        const input = this.parentElement.querySelector(".quantity-input");
+        const currentQty = parseInt(input.value);
+        const maxStock = parseInt(input.dataset.max) || 0;
+
+        if (currentQty > 1) {
+          updateQuantity(itemId, currentQty - 1, maxStock);
+        }
+      });
+    });
+
+    document.querySelectorAll(".plus-btn").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        if (this.disabled) return;
+
+        const itemId = parseInt(this.dataset.itemId);
+        const input = this.parentElement.querySelector(".quantity-input");
+        const currentQty = parseInt(input.value);
+        const maxStock = parseInt(input.dataset.max) || 0;
+
+        updateQuantity(itemId, currentQty + 1, maxStock);
+      });
+    });
+
+    document.querySelectorAll(".remove-item").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const itemId = parseInt(this.dataset.itemId);
+        removeFromCart(itemId);
+      });
+    });
+
+    document.querySelectorAll(".quantity-input").forEach((input) => {
+      input.addEventListener("change", function () {
+        const itemId = parseInt(this.dataset.itemId);
+        const maxStock = parseInt(this.dataset.max) || 0;
+        updateQuantityFromInput(itemId, this.value, maxStock);
+      });
+    });
+  }, 100);
 
   // Update summary
   const subtotal = cartData.subtotal || 0;
@@ -251,8 +314,19 @@ function displayCartFromLocalStorage() {
   document.getElementById("total").textContent = `$${total.toFixed(2)}`;
 }
 
-async function updateQuantity(itemId, newQuantity) {
+async function updateQuantity(itemId, newQuantity, maxStock) {
+  // Validate new quantity
   if (newQuantity < 0) newQuantity = 0;
+
+  // Check stock availability - client-side validation first
+  if (maxStock && newQuantity > maxStock) {
+    hideLoading(); // Hide loading immediately
+    showToast(`Maximum ${maxStock} items available`, "error");
+
+    // Just reload cart to reflect actual state
+    loadCart();
+    return;
+  }
 
   try {
     showLoading();
@@ -266,25 +340,66 @@ async function updateQuantity(itemId, newQuantity) {
       body: JSON.stringify({ quantity: newQuantity }),
     });
 
+    const responseData = await response.json();
+
     if (response.ok) {
       // Reload cart
-      loadCart();
-      showToast("Cart updated", "success");
+      await loadCart();
+
+      if (newQuantity === 0) {
+        showToast("Item removed from cart", "success");
+      } else {
+        showToast(`Quantity updated to ${newQuantity}`, "success");
+      }
     } else {
-      const error = await response.json();
-      showToast(error.error || "Failed to update cart", "error");
+      // Server-side validation failed
+      hideLoading(); // Hide loading on error
+
+      // Extract error message
+      let errorMsg = responseData.error || "Failed to update cart";
+
+      // Check if it's a stock error
+      if (
+        errorMsg.includes("stock") ||
+        errorMsg.includes("Stock") ||
+        errorMsg.includes("Maximum")
+      ) {
+        // Extract the max number from error message if available
+        const maxMatch = errorMsg.match(/\d+/);
+        if (maxMatch) {
+          errorMsg = `Maximum ${maxMatch[0]} items available`;
+        }
+        showToast(errorMsg, "error");
+      } else {
+        showToast(errorMsg, "error");
+      }
+
+      // Reload cart to get accurate stock info
+      loadCart();
     }
   } catch (error) {
     console.error("Error updating quantity:", error);
+    hideLoading(); // Hide loading on network error
     showToast("Network error", "error");
   }
 }
 
-function updateQuantityFromInput(itemId, value) {
+function updateQuantityFromInput(itemId, value, maxStock) {
   const quantity = parseInt(value);
-  if (!isNaN(quantity) && quantity >= 0) {
-    updateQuantity(itemId, quantity);
+  if (isNaN(quantity) || quantity < 0) {
+    showToast("Please enter a valid quantity", "error");
+    loadCart(); // Reload to reset input
+    return;
   }
+
+  // Validate against stock
+  if (maxStock && quantity > maxStock) {
+    showToast(`Maximum ${maxStock} items available`, "error");
+    loadCart(); // Reload to reset input
+    return;
+  }
+
+  updateQuantity(itemId, quantity, maxStock);
 }
 
 async function removeFromCart(itemId) {
@@ -300,14 +415,16 @@ async function removeFromCart(itemId) {
 
     if (response.ok) {
       // Reload cart
-      loadCart();
+      await loadCart();
       showToast("Item removed from cart", "success");
     } else {
       const error = await response.json();
+      hideLoading();
       showToast(error.error || "Failed to remove item", "error");
     }
   } catch (error) {
     console.error("Error removing item:", error);
+    hideLoading();
     showToast("Network error", "error");
   }
 }
@@ -328,11 +445,16 @@ async function clearCart() {
 
     if (response.ok) {
       // Reload cart
-      loadCart();
+      await loadCart();
       showToast("Cart cleared", "success");
+    } else {
+      hideLoading();
+      const error = await response.json();
+      showToast(error.error || "Failed to clear cart", "error");
     }
   } catch (error) {
     console.error("Error clearing cart:", error);
+    hideLoading();
     showToast("Failed to clear cart", "error");
   }
 }
@@ -370,7 +492,6 @@ function updateCartCount(count) {
             cartCountElement.textContent = data.item_count || 0;
           })
           .catch(() => {
-            
             const cart = JSON.parse(localStorage.getItem("cart") || "[]");
             const totalItems = cart.reduce(
               (sum, item) => sum + item.quantity,
@@ -386,9 +507,46 @@ function updateCartCount(count) {
   }
 }
 
+// Utility functions (make sure these exist)
+function showLoading() {
+  const loadingModal = document.getElementById("loadingModal");
+  if (loadingModal) {
+    loadingModal.style.display = "flex";
+  }
+}
 
-window.updateQuantity = updateQuantity;
-window.updateQuantityFromInput = updateQuantityFromInput;
-window.removeFromCart = removeFromCart;
-window.clearCart = clearCart;
+function hideLoading() {
+  const loadingModal = document.getElementById("loadingModal");
+  if (loadingModal) {
+    loadingModal.style.display = "none";
+  }
+}
+
+function showToast(message, type = "info") {
+  const toast = document.getElementById("messageToast");
+  if (!toast) return;
+
+  toast.textContent = message;
+  toast.className = "toast show";
+
+  // Set color based on type
+  if (type === "error") {
+    toast.style.backgroundColor = "#f56565";
+  } else if (type === "success") {
+    toast.style.backgroundColor = "#48bb78";
+  } else {
+    toast.style.backgroundColor = "#4299e1";
+  }
+
+  // Hide after 3 seconds
+  setTimeout(() => {
+    toast.className = "toast";
+  }, 3000);
+}
+
+// Remove inline onclick handlers from window object
+// window.updateQuantity = updateQuantity;
+// window.updateQuantityFromInput = updateQuantityFromInput;
+// window.removeFromCart = removeFromCart;
+// window.clearCart = clearCart;
 window.proceedToCheckout = proceedToCheckout;
