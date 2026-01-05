@@ -1,4 +1,3 @@
-// Checkout functionality
 document.addEventListener("DOMContentLoaded", function () {
   // Check authentication
   checkAuthStatus();
@@ -20,15 +19,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function setupNavigation() {
   // Show admin link if user is admin
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(localStorage.getItem("user"));
   if (user && user.is_admin === 1) {
-    const adminLink = document.getElementById('adminDashboardLink');
+    const adminLink = document.getElementById("adminDashboardLink");
     if (adminLink) {
-      adminLink.style.display = 'block';
-      adminLink.href = '../admin/admin-panel.html';
+      adminLink.style.display = "block";
+      adminLink.href = "../admin/admin-panel.html";
     }
   }
-  
+
   // Logout
   document.getElementById("logoutBtn").addEventListener("click", function (e) {
     e.preventDefault();
@@ -84,6 +83,10 @@ async function loadCheckoutData() {
     // Pre-fill form with user data
     prefillForm(user);
 
+    // Check if we have selected items in localStorage
+    const selectedCartItems =
+      JSON.parse(localStorage.getItem("selectedCartItems")) || [];
+
     // Fetch cart for order summary
     const response = await fetch(`${API_BASE_URL}/cart?user_id=${user.id}`, {
       credentials: "include",
@@ -95,8 +98,8 @@ async function loadCheckoutData() {
 
     const cartData = await response.json();
 
-    // Display order summary
-    displayOrderSummary(cartData);
+    // Display order summary with checkboxes
+    displayOrderSummary(cartData, selectedCartItems);
   } catch (error) {
     console.error("Error loading checkout data:", error);
     showToast("Failed to load checkout data", "error");
@@ -106,7 +109,6 @@ async function loadCheckoutData() {
 }
 
 function prefillForm(user) {
-  // Pre-fill form with user data if available
   document.getElementById(
     "fullName"
   ).value = `${user.first_name} ${user.last_name}`;
@@ -115,7 +117,7 @@ function prefillForm(user) {
   document.getElementById("address").value = user.address || "";
 }
 
-function displayOrderSummary(cartData) {
+function displayOrderSummary(cartData, selectedCartItems) {
   const orderItemsContainer = document.getElementById("orderItems");
 
   if (!cartData.items || cartData.items.length === 0) {
@@ -137,37 +139,77 @@ function displayOrderSummary(cartData) {
 
   let itemsHTML = "";
   let subtotal = 0;
+  let hasSelectedItems = false;
 
-  cartData.items.forEach((item) => {
+  // Create select all checkbox header
+  itemsHTML += `
+    <div class="select-all-container" style="margin-bottom: 15px; padding: 10px; background: #f7fafc; border-radius: 8px;">
+      <label style="display: flex; align-items: center; cursor: pointer;">
+        <input type="checkbox" id="selectAllCheckbox" style="margin-right: 10px; transform: scale(1.2);">
+        <span style="font-weight: 600;">Select All Items</span>
+      </label>
+    </div>
+  `;
+
+  cartData.items.forEach((item, index) => {
     const itemTotal = item.price * item.quantity;
-    subtotal += itemTotal;
+    const isSelected =
+      selectedCartItems.length === 0 ||
+      selectedCartItems.some(
+        (selected) => selected.product_id === item.product_id
+      );
+
+    if (isSelected) {
+      subtotal += itemTotal;
+      hasSelectedItems = true;
+    }
 
     itemsHTML += `
-            <div class="summary-item">
-                <div class="item-info">
-                    <div class="item-image">
-                        <img src="${
-                          item.image_url ||
-                          "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400"
-                        }" 
-                             alt="${item.name}"
-                             onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'">
-                    </div>
-                    <div>
-                        <div class="item-name">${item.name}</div>
-                        <div class="item-quantity">Quantity: ${
-                          item.quantity
-                        }</div>
-                    </div>
+            <div class="summary-item" style="display: flex; align-items: center; margin-bottom: 15px; padding: 10px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div style="margin-right: 15px;">
+                  <input type="checkbox" 
+                         class="item-checkbox" 
+                         data-product-id="${item.product_id}"
+                         data-quantity="${item.quantity}"
+                         data-price="${item.price}"
+                         ${isSelected ? "checked" : ""}
+                         style="transform: scale(1.2);">
                 </div>
-                <div class="item-price">
-                    $${itemTotal.toFixed(2)}
+                <div style="display: flex; align-items: center; flex-grow: 1;">
+                    <div class="item-info" style="display: flex; align-items: center; flex-grow: 1;">
+                        <div class="item-image" style="margin-right: 15px;">
+                            <img src="${
+                              item.image_url ||
+                              "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400"
+                            }" 
+                                 alt="${item.name}"
+                                 style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;"
+                                 onerror="this.src='https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'">
+                        </div>
+                        <div style="flex-grow: 1;">
+                            <div class="item-name" style="font-weight: 600; margin-bottom: 5px;">${
+                              item.name
+                            }</div>
+                            <div class="item-quantity" style="color: #718096; font-size: 14px;">Quantity: ${
+                              item.quantity
+                            }</div>
+                            <div class="item-unit-price" style="color: #718096; font-size: 14px;">Unit Price: $${item.price.toFixed(
+                              2
+                            )}</div>
+                        </div>
+                    </div>
+                    <div class="item-price" style="font-weight: 600; font-size: 18px;">
+                        $${itemTotal.toFixed(2)}
+                    </div>
                 </div>
             </div>
         `;
   });
 
   orderItemsContainer.innerHTML = itemsHTML;
+
+  // Add event listeners for checkboxes
+  setupCheckboxEvents();
 
   // Update totals
   const shipping = 5.0;
@@ -178,16 +220,100 @@ function displayOrderSummary(cartData) {
   )}`;
   document.getElementById("summaryTotal").textContent = `$${total.toFixed(2)}`;
 
-  // Enable place order button
-  document.getElementById("placeOrderBtn").disabled = false;
-  document.getElementById("placeOrderBtn").innerHTML =
-    '<i class="fas fa-check-circle"></i> Place Order';
+  // Enable/disable place order button based on selection
+  document.getElementById("placeOrderBtn").disabled = !hasSelectedItems;
+  document.getElementById("placeOrderBtn").innerHTML = hasSelectedItems
+    ? '<i class="fas fa-check-circle"></i> Place Order'
+    : '<i class="fas fa-times-circle"></i> No Items Selected';
+}
+
+function setupCheckboxEvents() {
+  // Select All checkbox
+  const selectAllCheckbox = document.getElementById("selectAllCheckbox");
+  const itemCheckboxes = document.querySelectorAll(".item-checkbox");
+
+  // Set initial state of select all checkbox
+  const checkedItems = Array.from(itemCheckboxes).filter((cb) => cb.checked);
+  selectAllCheckbox.checked = checkedItems.length === itemCheckboxes.length;
+  selectAllCheckbox.indeterminate =
+    checkedItems.length > 0 && checkedItems.length < itemCheckboxes.length;
+
+  // Select All functionality
+  selectAllCheckbox.addEventListener("change", function () {
+    const isChecked = this.checked;
+    itemCheckboxes.forEach((checkbox) => {
+      checkbox.checked = isChecked;
+    });
+    updateOrderSummary();
+  });
+
+  // Individual checkbox functionality
+  itemCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener("change", function () {
+      updateSelectAllCheckbox();
+      updateOrderSummary();
+    });
+  });
+}
+
+function updateSelectAllCheckbox() {
+  const selectAllCheckbox = document.getElementById("selectAllCheckbox");
+  const itemCheckboxes = document.querySelectorAll(".item-checkbox");
+
+  const checkedItems = Array.from(itemCheckboxes).filter((cb) => cb.checked);
+
+  if (checkedItems.length === 0) {
+    selectAllCheckbox.checked = false;
+    selectAllCheckbox.indeterminate = false;
+  } else if (checkedItems.length === itemCheckboxes.length) {
+    selectAllCheckbox.checked = true;
+    selectAllCheckbox.indeterminate = false;
+  } else {
+    selectAllCheckbox.checked = false;
+    selectAllCheckbox.indeterminate = true;
+  }
+}
+
+function updateOrderSummary() {
+  const itemCheckboxes = document.querySelectorAll(".item-checkbox");
+  let subtotal = 0;
+
+  itemCheckboxes.forEach((checkbox) => {
+    if (checkbox.checked) {
+      const price = parseFloat(checkbox.dataset.price);
+      const quantity = parseInt(checkbox.dataset.quantity);
+      subtotal += price * quantity;
+    }
+  });
+
+  // Update totals
+  const shipping = 5.0;
+  const total = subtotal + shipping;
+
+  document.getElementById("summarySubtotal").textContent = `$${subtotal.toFixed(
+    2
+  )}`;
+  document.getElementById("summaryTotal").textContent = `$${total.toFixed(2)}`;
+
+  // Enable/disable place order button based on selection
+  const hasSelectedItems = Array.from(itemCheckboxes).some((cb) => cb.checked);
+  document.getElementById("placeOrderBtn").disabled = !hasSelectedItems;
+  document.getElementById("placeOrderBtn").innerHTML = hasSelectedItems
+    ? '<i class="fas fa-check-circle"></i> Place Order'
+    : '<i class="fas fa-times-circle"></i> No Items Selected';
 }
 
 async function placeOrder() {
   try {
     // Validate form
     if (!validateForm()) {
+      return;
+    }
+
+    // Check if any items are selected
+    const selectedItems = getSelectedItems();
+    if (selectedItems.length === 0) {
+      showToast("Please select at least one item to checkout", "error");
       return;
     }
 
@@ -198,6 +324,7 @@ async function placeOrder() {
       user_id: getUserId(),
       shipping_address: getShippingAddress(),
       payment_method: getPaymentMethod(),
+      selected_items: selectedItems, // Include selected items in the order
     };
 
     // For online payment, check if file is uploaded
@@ -222,49 +349,71 @@ async function placeOrder() {
 
     if (response.ok) {
       const result = await response.json();
-      
+
       // Log order creation for debugging
       console.log("Order created successfully:", result);
-      
+
       // If online payment, upload payment proof
       if (formData.payment_method === "online_payment") {
         const fileInput = document.getElementById("paymentProof");
         if (fileInput.files.length > 0) {
           try {
             const paymentFormData = new FormData();
-            paymentFormData.append('payment_proof', fileInput.files[0]);
-            
-            // Ensure order ID exists before uploading
+            paymentFormData.append("payment_proof", fileInput.files[0]);
+
             if (!result.order || !result.order.id) {
               console.error("Order ID not found in response:", result);
-              showToast("Order created but payment proof upload failed. Please contact support.", "warning");
+              showToast(
+                "Order created but payment proof upload failed. Please contact support.",
+                "warning"
+              );
             } else {
-              console.log(`Uploading payment proof for order ID: ${result.order.id}`);
-              
-              const uploadResponse = await fetch(`${API_BASE_URL}/orders/${result.order.id}/payment-proof`, {
-                method: "POST",
-                credentials: "include",
-                body: paymentFormData,
-              });
-              
+              console.log(
+                `Uploading payment proof for order ID: ${result.order.id}`
+              );
+
+              const uploadResponse = await fetch(
+                `${API_BASE_URL}/orders/${result.order.id}/payment-proof`,
+                {
+                  method: "POST",
+                  credentials: "include",
+                  body: paymentFormData,
+                }
+              );
+
               if (!uploadResponse.ok) {
                 const uploadError = await uploadResponse.json();
                 console.error("Payment proof upload failed:", uploadError);
-                showToast("Order created but payment proof upload failed. Please contact support.", "warning");
+                showToast(
+                  "Order created but payment proof upload failed. Please contact support.",
+                  "warning"
+                );
               } else {
                 const uploadResult = await uploadResponse.json();
-                console.log("Payment proof uploaded successfully:", uploadResult);
-                showToast("Order placed and payment proof uploaded successfully!", "success");
+                console.log(
+                  "Payment proof uploaded successfully:",
+                  uploadResult
+                );
+                showToast(
+                  "Order placed and payment proof uploaded successfully!",
+                  "success"
+                );
               }
             }
           } catch (uploadError) {
             console.error("Payment proof upload error:", uploadError);
-            showToast("Order created but payment proof upload failed. Please contact support.", "warning");
+            showToast(
+              "Order created but payment proof upload failed. Please contact support.",
+              "warning"
+            );
           }
         }
       } else {
         showToast("Order placed successfully!", "success");
       }
+
+      // Clear selected items from localStorage after successful order
+      localStorage.removeItem("selectedCartItems");
 
       // Redirect to order confirmation page
       setTimeout(() => {
@@ -280,6 +429,21 @@ async function placeOrder() {
   } finally {
     hideLoading();
   }
+}
+
+function getSelectedItems() {
+  const selectedItems = [];
+  const itemCheckboxes = document.querySelectorAll(".item-checkbox:checked");
+
+  itemCheckboxes.forEach((checkbox) => {
+    selectedItems.push({
+      product_id: parseInt(checkbox.dataset.productId),
+      quantity: parseInt(checkbox.dataset.quantity),
+      price: parseFloat(checkbox.dataset.price),
+    });
+  });
+
+  return selectedItems;
 }
 
 function validateForm() {

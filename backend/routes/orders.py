@@ -44,20 +44,40 @@ def create_order():
         
         cursor = conn.cursor(dictionary=True)
         
-        # Get cart items with product details
-        cursor.execute("""
-            SELECT c.*, p.name, p.price, p.stock_quantity
-            FROM cart c
-            JOIN products p ON c.product_id = p.id
-            WHERE c.user_id = %s
-        """, (user_id,))
+        # Determine if only selected items should be checked out
+        selected_items = data.get('selected_items') or []
+        selected_product_ids = []
+        if isinstance(selected_items, list) and len(selected_items) > 0:
+            try:
+                selected_product_ids = [int(it.get('product_id')) for it in selected_items if 'product_id' in it]
+            except Exception:
+                selected_product_ids = []
+
+        # Get cart items with product details (optionally filtered by selection)
+        if selected_product_ids:
+            in_clause = ','.join(['%s'] * len(selected_product_ids))
+            query = f"""
+                SELECT c.*, p.name, p.price, p.stock_quantity
+                FROM cart c
+                JOIN products p ON c.product_id = p.id
+                WHERE c.user_id = %s AND c.product_id IN ({in_clause})
+            """
+            params = [user_id] + selected_product_ids
+            cursor.execute(query, params)
+        else:
+            cursor.execute("""
+                SELECT c.*, p.name, p.price, p.stock_quantity
+                FROM cart c
+                JOIN products p ON c.product_id = p.id
+                WHERE c.user_id = %s
+            """, (user_id,))
         
         cart_items = cursor.fetchall()
         
         if not cart_items:
             cursor.close()
             conn.close()
-            return jsonify({'error': 'Cart is empty'}), 400
+            return jsonify({'error': 'No items selected or cart is empty'}), 400
         
         # Validate stock and calculate total
         total_amount = 0
@@ -103,8 +123,14 @@ def create_order():
                 WHERE id = %s
             """, (item_data['quantity'], item_data['product_id']))
         
-        # Clear cart after order
-        cursor.execute("DELETE FROM cart WHERE user_id = %s", (user_id,))
+        # Remove only the checked out items from the cart
+        if selected_product_ids:
+            in_clause = ','.join(['%s'] * len(selected_product_ids))
+            query = f"DELETE FROM cart WHERE user_id = %s AND product_id IN ({in_clause})"
+            params = [user_id] + selected_product_ids
+            cursor.execute(query, params)
+        else:
+            cursor.execute("DELETE FROM cart WHERE user_id = %s", (user_id,))
         
         conn.commit()
         
