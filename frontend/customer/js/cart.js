@@ -292,7 +292,7 @@ async function updateQuantity(itemId, newQuantity) {
 
     const user = JSON.parse(localStorage.getItem("user"));
 
-    const response = await fetch(`${API_BASE_URL}/cart/${itemId}`, {
+    const response = await fetch(`${API_BASE_URL}/cart/update/${itemId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -311,14 +311,7 @@ async function updateQuantity(itemId, newQuantity) {
     // Update quantity display
     document.getElementById(`quantity-${itemId}`).value = newQuantity;
 
-    // Recalculate item total
-    const item = await response.json();
-    const itemTotal = item.price * item.quantity;
-    document.getElementById(
-      `item-total-${itemId}`
-    ).textContent = `$${itemTotal.toFixed(2)}`;
-
-    // Reload cart to update totals
+    // Reload cart to update totals and item totals from server
     await loadCart();
 
     showToast("Quantity updated successfully", "success");
@@ -341,7 +334,7 @@ async function removeFromCart(itemId) {
     const user = JSON.parse(localStorage.getItem("user"));
 
     const response = await fetch(
-      `${API_BASE_URL}/cart/${itemId}?user_id=${user.id}`,
+      `${API_BASE_URL}/cart/remove/${itemId}`,
       {
         method: "DELETE",
         credentials: "include",
